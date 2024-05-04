@@ -1,0 +1,376 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Auth ----------------
+model Permission {
+  Id             Int              @id @default(autoincrement())
+  Action         String           @db.VarChar(200)
+  Key            String           @db.VarChar(200)
+  Description    String           @db.VarChar(200)
+  CreatedAt      DateTime?        @default(now()) @db.Timestamp(6)
+  UpdatedAt      DateTime?        @default(now()) @db.Timestamp(6)
+  DeletedAt      DateTime?        @db.Timestamp(6)
+  RolePermission RolePermission[]
+}
+
+model Role {
+  Id             Int              @id @default(autoincrement())
+  Name           String           @db.VarChar(200)
+  Description    String           @db.VarChar(200)
+  OwnerId        Int
+  CreatedAt      DateTime?        @default(now()) @db.Timestamp(6)
+  UpdatedAt      DateTime?        @default(now()) @db.Timestamp(6)
+  DeletedAt      DateTime?        @db.Timestamp(6)
+  RolePermission RolePermission[]
+  User           User[]           @relation("UsersInRole")
+  Owner          User             @relation(fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model RolePermission {
+  PermissionId Int
+  RoleId       Int
+  CreatedAt    DateTime?  @default(now()) @db.Timestamp(6)
+  UpdatedAt    DateTime?  @default(now()) @db.Timestamp(6)
+  DeletedAt    DateTime?  @db.Timestamp(6)
+  Permission   Permission @relation(fields: [PermissionId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Role         Role       @relation(fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([PermissionId, RoleId])
+}
+
+model Session {
+  Id        Int       @id @default(autoincrement())
+  Token     String    @db.VarChar(200)
+  UserId    Int
+  ClientId  Int
+  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt DateTime? @db.Timestamp(6)
+  User      User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model InvitationStatus {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  User        User[]
+}
+
+model User {
+  Id                 Int                   @id @default(autoincrement())
+  Name               String                @db.VarChar(200)
+  Document           String?               @db.VarChar(200)
+  DocumentType       String?               @db.VarChar(200)
+  Phone              String?               @db.VarChar(200)
+  Email              String                @db.VarChar(200)
+  Password           String                @db.VarChar(200)
+  IsActive           Boolean?
+  IsMaster           Boolean?              @default(false)
+  ParentId           Int?
+  RoleId             Int?
+  UserTypeId         Int
+  InvitationStatusId Int?
+  CreatedAt          DateTime?             @default(now()) @db.Timestamp(6)
+  UpdatedAt          DateTime?             @default(now()) @db.Timestamp(6)
+  DeletedAt          DateTime?             @db.Timestamp(6)
+  Event              Event[]
+  File               File[]
+  FilePermissions    FilePermissions[]
+  Folder             Folder[]
+  FolderPermission   FolderPermission[]
+  CreatedNotes       Note[]                @relation("Note_CreatedByToUser")
+  UpdatedNotes       Note[]                @relation("Note_UpdatedByToUser")
+  Phase              Phase[]
+  CreatedProject     Project[]             @relation("Project_CreatedByToUser")
+  LeaderProject      Project[]             @relation("Project_LeaderIdToUser")
+  OwnerProject       Project[]             @relation("Project_OwnerIdToUser")
+  ScheduleEvent      ScheduleEvent[]
+  Session            Session[]
+  AssignedTask       Task[]                @relation("Task_AssignToToUser")
+  CreatedTask        Task[]                @relation("Task_CreatedByToUser")
+  InvitationStatus   InvitationStatus?     @relation(fields: [InvitationStatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ParentUser         User?                 @relation("UserToUser", fields: [ParentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ChildUser          User[]                @relation("UserToUser")
+  Role               Role?                 @relation("UsersInRole", fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  FavoriteProject    UserFavoriteProject[]
+  UserType           UserType              @relation(fields: [UserTypeId], references: [Id])
+  OwnedRoles         Role[]
+}
+
+model UserType {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  User        User[]
+}
+
+// Project ----------------
+model BoardColumns {
+  Id          Int       @id @default(autoincrement())
+  ProjectId   Int
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  Project     Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model BoardStatus {
+  Id                Int             @id @default(autoincrement())
+  ProjectId         Int
+  Description       String          @db.VarChar(200)
+  BoardStatusTypeId Int
+  CreatedAt         DateTime?       @default(now()) @db.Timestamp(6)
+  UpdatedAt         DateTime?       @default(now()) @db.Timestamp(6)
+  DeletedAt         DateTime?       @db.Timestamp(6)
+  BoardStatusType   BoardStatusType @relation(fields: [BoardStatusTypeId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project           Project         @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Task              Task[]
+}
+
+model BoardStatusType {
+  Id          Int           @id @default(autoincrement())
+  Description String        @db.VarChar(200)
+  CreatedAt   DateTime?     @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime?     @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime?     @db.Timestamp(6)
+  BoardStatus BoardStatus[]
+}
+
+model Phase {
+  Id              Int       @id @default(autoincrement())
+  Description     String    @db.VarChar(200)
+  Color           String    @db.VarChar(200)
+  ProjectId       Int
+  StartAt         String    @db.VarChar(200)
+  EndAt           String    @db.VarChar(200)
+  CreatedBy       Int
+  CreatedAt       DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt       DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt       DateTime? @db.Timestamp(6)
+  User            User      @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project         Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectsInPhase Project[] @relation("Project_ActivePhaseIdToPhase")
+  Task            Task[]
+}
+
+model Project {
+  Id                  Int                   @id @default(autoincrement())
+  Name                String                @db.VarChar(200)
+  Tag                 String?               @db.VarChar(200)
+  ActivePhaseId       Int?
+  CategoryId          Int?
+  OwnerId             Int
+  LeaderId            Int
+  CreatedBy           Int
+  StartAt             DateTime              @db.Timestamp(6)
+  EndAt               DateTime?             @db.Timestamp(6)
+  CreatedAt           DateTime?             @default(now()) @db.Timestamp(6)
+  UpdatedAt           DateTime?             @default(now()) @db.Timestamp(6)
+  DeletedAt           DateTime?             @db.Timestamp(6)
+  BoardColumns        BoardColumns[]
+  BoardStatus         BoardStatus[]
+  File                File[]
+  Folder              Folder[]
+  ProjectCategory     ProjectCategory?      @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectPhase        Phase?                @relation("Project_ActivePhaseIdToPhase", fields: [ActivePhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectCreator      User                  @relation("Project_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectLeader       User                  @relation("Project_LeaderIdToUser", fields: [LeaderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectOwner        User                  @relation("Project_OwnerIdToUser", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  UserFavoriteProject UserFavoriteProject[]
+  Phase               Phase[]
+}
+
+model ProjectCategory {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  Project     Project[]
+}
+
+model UserFavoriteProject {
+  Id        Int       @id @default(autoincrement())
+  UserId    Int
+  ProjectId Int
+  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt DateTime? @db.Timestamp(6)
+  Project   Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User      User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Task {
+  Id            Int         @id @default(autoincrement())
+  Name          String      @db.VarChar(200)
+  Description   String?     @db.VarChar(200)
+  EstimatedTime Int?
+  PhaseId       Int
+  StatusId      Int
+  AssignTo      Int?
+  CreatedBy     Int
+  StartAt       String      @db.VarChar(200)
+  EndAt         String      @db.VarChar(200)
+  IsOnBoard     Boolean?
+  CreatedAt     DateTime?   @default(now()) @db.Timestamp(6)
+  UpdatedAt     DateTime?   @default(now()) @db.Timestamp(6)
+  DeletedAt     DateTime?   @db.Timestamp(6)
+  TaskAssignee  User?       @relation("Task_AssignToToUser", fields: [AssignTo], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  TaskCreator   User        @relation("Task_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Phase         Phase       @relation(fields: [PhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  BoardStatus   BoardStatus @relation(fields: [StatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+// Schedule ----------------
+model Event {
+  Id            Int             @id @default(autoincrement())
+  Name          String          @db.VarChar(200)
+  Description   String?         @db.VarChar(200)
+  EventTypeId   Int
+  HostId        Int
+  Location      String?         @db.VarChar(200)
+  MeetingLink   String?         @db.VarChar(200)
+  StartAt       String          @db.VarChar(200)
+  EndAt         String?         @db.VarChar(200)
+  CreatedAt     DateTime?       @default(now()) @db.Timestamp(6)
+  UpdatedAt     DateTime?       @default(now()) @db.Timestamp(6)
+  DeletedAt     DateTime?       @db.Timestamp(6)
+  EventType     EventType       @relation(fields: [EventTypeId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User          User            @relation(fields: [HostId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ScheduleEvent ScheduleEvent[]
+}
+
+model ScheduleEvent {
+  Id                    Int                  @id @default(autoincrement())
+  UserId                Int?
+  EventId               Int?
+  ScheduleEventStatusId Int?
+  CreatedAt             DateTime?            @default(now()) @db.Timestamp(6)
+  UpdatedAt             DateTime?            @default(now()) @db.Timestamp(6)
+  DeletedAt             DateTime?            @db.Timestamp(6)
+  Event                 Event?               @relation(fields: [EventId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ScheduleEventStatus   ScheduleEventStatus? @relation(fields: [ScheduleEventStatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User                  User?                @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model ScheduleEventStatus {
+  Id            Int             @id @default(autoincrement())
+  Description   String          @db.VarChar(200)
+  CreatedAt     DateTime?       @default(now()) @db.Timestamp(6)
+  UpdatedAt     DateTime?       @default(now()) @db.Timestamp(6)
+  DeletedAt     DateTime?       @db.Timestamp(6)
+  ScheduleEvent ScheduleEvent[]
+}
+
+model EventType {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  Event       Event[]
+}
+
+// Drive ----------------
+model File {
+  Id                Int               @id @default(autoincrement())
+  Name              String            @db.VarChar(200)
+  MimeType          String?           @db.VarChar(200)
+  Extension         String            @db.VarChar(200)
+  Size              BigInt?
+  IsVisibleToClient Boolean?          @default(false)
+  StorageFileId     Int
+  UploadedBy        Int
+  FolderId          Int?
+  ProjectId         Int?
+  CreatedAt         DateTime?         @default(now()) @db.Timestamp(6)
+  UpdatedAt         DateTime?         @default(now()) @db.Timestamp(6)
+  DeletedAt         DateTime?         @db.Timestamp(6)
+  Folder            Folder?           @relation(fields: [FolderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project           Project?          @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  StorageFile       StorageFile       @relation(fields: [StorageFileId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User              User              @relation(fields: [UploadedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  FilePermissions   FilePermissions[]
+}
+
+model FilePermissions {
+  Id            Int          @id @default(autoincrement())
+  FileId        Int?
+  UserId        Int?
+  AccessLevelId Int?
+  AccessLevel   AccessLevel? @relation(fields: [AccessLevelId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  File          File?        @relation(fields: [FileId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User          User?        @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Folder {
+  Id                Int                @id @default(autoincrement())
+  Name              String             @db.VarChar(200)
+  ParentId          Int?
+  ProjectId         Int?
+  CreatedBy         Int
+  IsVisibleToClient Boolean?           @default(false)
+  CreatedAt         DateTime?          @default(now()) @db.Timestamp(6)
+  UpdatedAt         DateTime?          @default(now()) @db.Timestamp(6)
+  DeletedAt         DateTime?          @db.Timestamp(6)
+  File              File[]
+  User              User               @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ParentFolder      Folder?            @relation("FolderToFolder", fields: [ParentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ChildFolder       Folder[]           @relation("FolderToFolder")
+  Project           Project?           @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  FolderPermission  FolderPermission[]
+}
+
+model FolderPermission {
+  Id            Int          @id @default(autoincrement())
+  FolderId      Int?
+  UserId        Int?
+  AccessLevelId Int?
+  AccessLevel   AccessLevel? @relation(fields: [AccessLevelId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Folder        Folder?      @relation(fields: [FolderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User          User?        @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model StorageFile {
+  Id        Int       @id @default(autoincrement())
+  Url       String    @db.VarChar(200)
+  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt DateTime? @db.Timestamp(6)
+  File      File[]
+}
+
+model AccessLevel {
+  Id               Int                @id @default(autoincrement())
+  Description      String             @db.VarChar(200)
+  CreatedAt        DateTime?          @default(now()) @db.Timestamp(6)
+  UpdatedAt        DateTime?          @default(now()) @db.Timestamp(6)
+  DeletedAt        DateTime?          @db.Timestamp(6)
+  FilePermissions  FilePermissions[]
+  FolderPermission FolderPermission[]
+}
+
+// Note ----------------
+model Note {
+  Id             Int       @id @default(autoincrement())
+  Title          String    @db.VarChar(200)
+  Content        String?
+  CreatedBy      Int
+  UpdatedBy      Int?
+  CreatedAt      DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt      DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt      DateTime? @db.Timestamp(6)
+  NoteCreator    User      @relation("Note_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  NoteLastEditor User?     @relation("Note_UpdatedByToUser", fields: [UpdatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
