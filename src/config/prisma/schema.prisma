@@ -48,7 +48,7 @@ model Session {
   Id        Int       @id @default(autoincrement())
   Token     String    @db.VarChar(200)
   UserId    Int
-  ClientId  Int
+  ClientId  String    @db.VarChar(200)
   CreatedAt DateTime? @default(now()) @db.Timestamp(6)
   UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
   DeletedAt DateTime? @db.Timestamp(6)
@@ -70,7 +70,7 @@ model User {
   Document           String?               @db.VarChar(200)
   DocumentType       String?               @db.VarChar(200)
   Phone              String?               @db.VarChar(200)
-  Email              String                @db.VarChar(200)
+  Email              String                @db.VarChar(200) @unique
   Password           String                @db.VarChar(200)
   IsActive           Boolean?
   IsMaster           Boolean?              @default(false)

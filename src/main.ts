@@ -12,8 +12,8 @@ async function bootstrap() {
   const port = configService.get<number>('PORT');
 
   const config = new DocumentBuilder()
-    .setTitle('Ager Management Api')
-    .setDescription('This service is responsible for management api')
+    .setTitle('Archie Main Api')
+    .setDescription('This is the main service for Archie project.')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -31,6 +31,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(port);
 
-  console.log(`🚀 Application is running on: http://localhost:${port}/docs`);
+  console.log(`📄 You can find the API documentation on: /docs`);
+  console.log(`🚀 Application is running on: http://localhost:${port}`);
 }
 void bootstrap();

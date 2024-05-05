@@ -26,21 +26,38 @@ export class EnvironmentVariables {
   PORT: number;
 
   @IsString()
-  SERVICE_URL: string;
+  DATABASE_URL: string;
 
   @IsString()
-  DATABASE_URL: string;
+  JWT_SECRET_KEY: string;
+  @IsString()
+  JWT_EXPIRE_TIME: string;
+  @IsString()
+  JWT_REFRESH_SECRET_KEY: string;
+  @IsString()
+  JWT_REFRESH_EXPIRE_TIME: string;
+  @IsString()
+  ENCRYPTION_SALT_ROUNDS: string;
+
 
   constructor(
     env: Environment,
     port: number,
-    serviceUrl: string,
     dbUrl: string,
+    jwtSecretKey: string,
+    jwtExpireTime: string,
+    jwtRefreshSecretKey: string,
+    jwtRefreshExpireTime: string,
+    encryptionSaltRounds: string,
   ) {
     this.ENVIRONMENT = env;
     this.PORT = port;
-    this.SERVICE_URL = serviceUrl;
     this.DATABASE_URL = dbUrl;
+    this.JWT_SECRET_KEY = jwtSecretKey;
+    this.JWT_EXPIRE_TIME = jwtExpireTime;
+    this.JWT_REFRESH_SECRET_KEY = jwtRefreshSecretKey;
+    this.JWT_REFRESH_EXPIRE_TIME = jwtRefreshExpireTime;
+    this.ENCRYPTION_SALT_ROUNDS = encryptionSaltRounds;
   }
 }
 
