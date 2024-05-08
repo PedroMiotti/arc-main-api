@@ -21,7 +21,6 @@ export interface Pagination {
   CurrentPage: number;
   PageSize: number;
   TotalObjects: number;
-  Links: Links;
 }
 
 export interface Links {

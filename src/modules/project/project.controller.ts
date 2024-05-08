@@ -13,11 +13,13 @@ import {
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
 import { Response } from 'express';
 import { handleResponse } from 'src/shared/http/handle-response';
+import { OkResult } from 'src/shared/result/result.interface';
+import { Project } from '@prisma/client';
 
 @ApiTags('Project')
 @UseGuards(JwtGuard)
@@ -27,6 +29,11 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @ApiOperation({ summary: 'Create a new Project' })
+  @ApiResponse({
+    status: 200,
+    description: 'Result object with new Project data',
+    type: typeof OkResult<Project>,
+  })
   @Post()
   async create(
     @Body() createProjectDto: CreateProjectDto,

@@ -55,11 +55,8 @@ export class PaginationResponse implements Pagination {
   CurrentPage: number;
   PageSize: number;
   TotalObjects: number;
-  Links: Links;
 
   constructor(
-    resource: string,
-    serviceUrl: string,
     totalPages: number,
     currentPage: number,
     pageSize: number,
@@ -69,13 +66,5 @@ export class PaginationResponse implements Pagination {
     this.TotalObjects = totalObjects;
     this.CurrentPage = currentPage;
     this.PageSize = pageSize;
-
-    this.Links = new PaginationLinks(
-      serviceUrl,
-      resource,
-      currentPage,
-      pageSize,
-      totalPages,
-    );
   }
 }

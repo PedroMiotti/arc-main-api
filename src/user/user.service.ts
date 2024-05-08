@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/config/prisma/prisma.service';
-import { ErrorResult, OkResult } from 'src/shared/result/result.interface';
+import {
+  ErrorResult,
+  OkResult,
+  PaginatedResult,
+} from 'src/shared/result/result.interface';
 import { JwtClaims } from 'src/shared/http/jwt.decorator';
 import { Status } from 'src/shared/result/status.enum';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { calculateTotalPages } from 'src/shared/pagination/pagination.util';
 
 @Injectable()
 export class UserService {
@@ -97,8 +102,32 @@ export class UserService {
     );
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAllByOwner(claims: JwtClaims, take: number, skip: number) {
+    const ownerId = claims?.OwnerId;
+
+    const [users, total] = await this.prismaService.$transaction([
+      this.prismaService.user.findMany({
+        where: {
+          ParentId: ownerId,
+        },
+        orderBy: { Id: 'asc' },
+        skip,
+        take,
+      }),
+      this.prismaService.user.count({ where: { ParentId: ownerId } }),
+    ]);
+
+    const msg =
+      users.length == 0
+        ? 'Search result returned no objects.'
+        : 'Listing available clients.';
+
+    return new PaginatedResult(
+      msg,
+      users,
+      total,
+      calculateTotalPages(take, total),
+    );
   }
 
   findOne(id: number) {

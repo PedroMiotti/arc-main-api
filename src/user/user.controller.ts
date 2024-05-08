@@ -9,6 +9,7 @@ import {
   Res,
   HttpStatus,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,6 +20,8 @@ import { handleResponse } from 'src/shared/http/handle-response';
 import { Response } from 'express';
 import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
 import { PublicRoute } from 'src/shared/http/is-public-route.decorator';
+import { PaginationResponse } from 'src/shared/pagination/pagination.util';
+import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 
 @ApiTags('User')
 @UseGuards(JwtGuard)
@@ -43,21 +46,45 @@ export class UserController {
     });
   }
 
+  @ApiOperation({ summary: 'Get all users by owner Id' })
   @Get()
-  findAll(@Jwt() claims: JwtClaims) {
-    return this.userService.findAll();
+  async findAllByOwner(
+    @Jwt() claims: JwtClaims,
+    @Query('PageNumber') pageNumber: number,
+    @Query('PageSize') pageSize: number,
+    @Res() response: Response,
+  ) {
+    const { skip, take, PageNumber, PageSize } = new PaginationFilter(
+      pageNumber,
+      pageSize,
+    );
+    const result = await this.userService.findAllByOwner(claims, take, skip);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+      Pagination: new PaginationResponse(
+        result.totalPages,
+        PageNumber,
+        PageSize,
+        result.totalObjects,
+      ),
+    });
   }
 
+  @ApiOperation({ summary: 'Get a user by Id' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(+id);
   }
 
+  @ApiOperation({ summary: 'Update a user by Id' })
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 
+  @ApiOperation({ summary: 'Delete a user by Id' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
