@@ -120,7 +120,7 @@ export class UserService {
     const msg =
       users.length == 0
         ? 'Search result returned no objects.'
-        : 'Listing available clients.';
+        : 'Listing available users.';
 
     return new PaginatedResult(
       msg,

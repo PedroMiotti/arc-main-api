@@ -9,17 +9,25 @@ import {
   UseGuards,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
 import { Response } from 'express';
 import { handleResponse } from 'src/shared/http/handle-response';
 import { OkResult } from 'src/shared/result/result.interface';
 import { Project } from '@prisma/client';
+import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
+import { PaginationResponse } from 'src/shared/pagination/pagination.util';
 
 @ApiTags('Project')
 @UseGuards(JwtGuard)
@@ -48,10 +56,31 @@ export class ProjectController {
     });
   }
 
-  @ApiOperation({ summary: 'List all projects' })
+  @ApiOperation({ summary: 'List all user projects' })
   @Get()
-  findAll() {
-    return this.projectService.findAll();
+  async findAll(
+    @Jwt() claims: JwtClaims,
+    @Query('PageNumber') pageNumber: number,
+    @Query('PageSize') pageSize: number,
+    @Res() response: Response,
+  ) {
+    const { skip, take, PageNumber, PageSize } = new PaginationFilter(
+      pageNumber,
+      pageSize,
+    );
+    
+    const result = await this.projectService.findAllUserProjects(claims, take, skip);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+      Pagination: new PaginationResponse(
+        result.totalPages,
+        PageNumber,
+        PageSize,
+        result.totalObjects,
+      ),
+    });
   }
 
   @ApiOperation({ summary: 'Find project by Id' })

@@ -65,43 +65,43 @@ model InvitationStatus {
 }
 
 model User {
-  Id                 Int                   @id @default(autoincrement())
-  Name               String                @db.VarChar(200)
-  Document           String?               @db.VarChar(200)
-  DocumentType       String?               @db.VarChar(200)
-  Phone              String?               @db.VarChar(200)
-  Email              String                @db.VarChar(200) @unique
-  Password           String                @db.VarChar(200)
+  Id                 Int                @id @default(autoincrement())
+  Name               String             @db.VarChar(200)
+  Document           String?            @db.VarChar(200)
+  DocumentType       String?            @db.VarChar(200)
+  Phone              String?            @db.VarChar(200)
+  Email              String             @unique @db.VarChar(200)
+  Password           String             @db.VarChar(200)
   IsActive           Boolean?
-  IsMaster           Boolean?              @default(false)
+  IsMaster           Boolean?           @default(false)
   ParentId           Int?
   RoleId             Int?
   UserTypeId         Int
   InvitationStatusId Int?
-  CreatedAt          DateTime?             @default(now()) @db.Timestamp(6)
-  UpdatedAt          DateTime?             @default(now()) @db.Timestamp(6)
-  DeletedAt          DateTime?             @db.Timestamp(6)
+  CreatedAt          DateTime?          @default(now()) @db.Timestamp(6)
+  UpdatedAt          DateTime?          @default(now()) @db.Timestamp(6)
+  DeletedAt          DateTime?          @db.Timestamp(6)
   Event              Event[]
   File               File[]
   FilePermissions    FilePermissions[]
   Folder             Folder[]
   FolderPermission   FolderPermission[]
-  CreatedNotes       Note[]                @relation("Note_CreatedByToUser")
-  UpdatedNotes       Note[]                @relation("Note_UpdatedByToUser")
+  CreatedNotes       Note[]             @relation("Note_CreatedByToUser")
+  UpdatedNotes       Note[]             @relation("Note_UpdatedByToUser")
   Phase              Phase[]
-  CreatedProject     Project[]             @relation("Project_CreatedByToUser")
-  LeaderProject      Project[]             @relation("Project_LeaderIdToUser")
-  OwnerProject       Project[]             @relation("Project_OwnerIdToUser")
+  CreatedProject     Project[]          @relation("Project_CreatedByToUser")
+  LeaderProject      Project[]          @relation("Project_LeaderIdToUser")
+  OwnerProject       Project[]          @relation("Project_OwnerIdToUser")
   ScheduleEvent      ScheduleEvent[]
   Session            Session[]
-  AssignedTask       Task[]                @relation("Task_AssignToToUser")
-  CreatedTask        Task[]                @relation("Task_CreatedByToUser")
-  InvitationStatus   InvitationStatus?     @relation(fields: [InvitationStatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ParentUser         User?                 @relation("UserToUser", fields: [ParentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ChildUser          User[]                @relation("UserToUser")
-  Role               Role?                 @relation("UsersInRole", fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  FavoriteProject    UserFavoriteProject[]
-  UserType           UserType              @relation(fields: [UserTypeId], references: [Id])
+  AssignedTask       Task[]             @relation("Task_AssignToToUser")
+  CreatedTask        Task[]             @relation("Task_CreatedByToUser")
+  InvitationStatus   InvitationStatus?  @relation(fields: [InvitationStatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ParentUser         User?              @relation("UserToUser", fields: [ParentId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ChildUser          User[]             @relation("UserToUser")
+  Role               Role?              @relation("UsersInRole", fields: [RoleId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  UserProject        UserProject[]
+  UserType           UserType           @relation(fields: [UserTypeId], references: [Id])
   OwnedRoles         Role[]
 }
 
@@ -165,30 +165,30 @@ model Phase {
 }
 
 model Project {
-  Id                  Int                   @id @default(autoincrement())
-  Name                String                @db.VarChar(200)
-  Tag                 String?               @db.VarChar(200)
-  ActivePhaseId       Int?
-  CategoryId          Int?
-  OwnerId             Int
-  LeaderId            Int
-  CreatedBy           Int
-  StartAt             DateTime              @db.Timestamp(6)
-  EndAt               DateTime?             @db.Timestamp(6)
-  CreatedAt           DateTime?             @default(now()) @db.Timestamp(6)
-  UpdatedAt           DateTime?             @default(now()) @db.Timestamp(6)
-  DeletedAt           DateTime?             @db.Timestamp(6)
-  BoardColumns        BoardColumns[]
-  BoardStatus         BoardStatus[]
-  File                File[]
-  Folder              Folder[]
-  ProjectCategory     ProjectCategory?      @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectPhase        Phase?                @relation("Project_ActivePhaseIdToPhase", fields: [ActivePhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectCreator      User                  @relation("Project_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectLeader       User                  @relation("Project_LeaderIdToUser", fields: [LeaderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectOwner        User                  @relation("Project_OwnerIdToUser", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  UserFavoriteProject UserFavoriteProject[]
-  Phase               Phase[]
+  Id              Int              @id @default(autoincrement())
+  Name            String           @db.VarChar(200)
+  Tag             String?          @db.VarChar(200)
+  ActivePhaseId   Int?
+  CategoryId      Int?
+  OwnerId         Int
+  LeaderId        Int
+  CreatedBy       Int
+  StartAt         DateTime         @db.Timestamp(6)
+  EndAt           DateTime?        @db.Timestamp(6)
+  CreatedAt       DateTime?        @default(now()) @db.Timestamp(6)
+  UpdatedAt       DateTime?        @default(now()) @db.Timestamp(6)
+  DeletedAt       DateTime?        @db.Timestamp(6)
+  BoardColumns    BoardColumns[]
+  BoardStatus     BoardStatus[]
+  File            File[]
+  Folder          Folder[]
+  ProjectCategory ProjectCategory? @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectPhase    Phase?           @relation("Project_ActivePhaseIdToPhase", fields: [ActivePhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectCreator  User             @relation("Project_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectLeader   User             @relation("Project_LeaderIdToUser", fields: [LeaderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectOwner    User             @relation("Project_OwnerIdToUser", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  UserProject     UserProject[]
+  Phase           Phase[]
 }
 
 model ProjectCategory {
@@ -200,10 +200,11 @@ model ProjectCategory {
   Project     Project[]
 }
 
-model UserFavoriteProject {
+model UserProject {
   Id        Int       @id @default(autoincrement())
   UserId    Int
   ProjectId Int
+  IsFavorite Boolean?
   CreatedAt DateTime? @default(now()) @db.Timestamp(6)
   UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
   DeletedAt DateTime? @db.Timestamp(6)
