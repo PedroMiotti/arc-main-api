@@ -6,7 +6,7 @@ import { PrismaModule } from './config/prisma/prisma.module';
 import { validate } from './config/server/env.validation';
 import { ProjectModule } from './modules/project/project.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { UserModule } from './user/user.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
