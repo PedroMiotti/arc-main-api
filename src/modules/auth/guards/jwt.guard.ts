@@ -8,7 +8,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { Http2ServerRequest } from 'http2';
+import { Request } from 'express';
+import { JwtClaims } from 'src/shared/http/jwt.decorator';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
@@ -19,7 +20,7 @@ export class JwtGuard implements CanActivate {
   ) {}
 
   canActivate = async (context: ExecutionContext): Promise<any> => {
-    const request = context.switchToHttp().getRequest<Http2ServerRequest>();
+    const request = context.switchToHttp().getRequest<Request>();
     const isPublicRoute = this.reflector.get<boolean>(
       'isPublicRoute',
       context.getHandler(),
@@ -30,39 +31,38 @@ export class JwtGuard implements CanActivate {
     return this.validateRequest(request);
   };
 
-  validateRequest = async (request: Http2ServerRequest): Promise<any> => {
+  validateRequest = async (request: Request): Promise<any> => {
     const token = request.headers['authorization'] as string;
 
-    if (token) return this.checkAuth(token);
+    if (!token) {
+      throw new BadRequestException(
+        "Request is missing 'Authorization' header.",
+      );
+    }
 
+    const [type, rawToken] = token.split(' ');
+    if (type !== 'Bearer') {
+      throw new BadRequestException(
+        "'Authorization header is not of type 'Bearer'.",
+      );
+    } else if (!rawToken) {
+      throw new BadRequestException('Invalid Bearer token.');
+    }
+
+    if (token) return this.checkIsTokenValid(token)
+      
     throw new UnauthorizedException();
   };
 
-  checkAuth = async (token: string): Promise<boolean> => {
+  checkIsTokenValid = async (token: string): Promise<boolean> => {
     try {
-      if (!token) {
-        throw new BadRequestException(
-          "Request is missing 'Authorization' header.",
-        );
-      }
-
-      const [type, rawToken] = token.split(' ');
-      if (type !== 'Bearer') {
-        throw new BadRequestException(
-          "'Authorization header is not of type 'Bearer'.",
-        );
-      } else if (!rawToken) {
-        throw new BadRequestException('Invalid Bearer token.');
-      }
-
-      const isTokenValid = await this.jwtService.verifyAsync(rawToken, {
+      const isTokenValid = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get('JWT_SECRET_KEY'),
       });
       if (!isTokenValid) {
         throw new BadRequestException('Invalid Bearer token.');
       }
 
-      this.jwtService.decode(token, { json: true });
       return true;
     } catch (error) {
       throw new BadRequestException('Invalid Bearer token.');
