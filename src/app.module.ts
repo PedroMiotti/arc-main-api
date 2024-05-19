@@ -7,6 +7,7 @@ import { validate } from './config/server/env.validation';
 import { ProjectModule } from './modules/project/project.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { ClientModule } from './modules/client/client.module';
 
 @Module({
   imports: [
@@ -18,8 +19,9 @@ import { UserModule } from './modules/user/user.module';
     }),
     PrismaModule,
     AuthModule,
-    ProjectModule,
     UserModule,
+    ClientModule,
+    ProjectModule,
   ],
   controllers: [AppController],
   providers: [AppService],

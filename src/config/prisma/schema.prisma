@@ -241,7 +241,7 @@ model Client {
   Id          Int       @id @default(autoincrement())
   Name        String    @db.VarChar(200)
   Email       String    @db.VarChar(200)
-  Phone       String    @db.VarChar(200)
+  Phone       String?    @db.VarChar(200)
   UserId      Int
   OwnerId     Int
   CreatedAt   DateTime? @default(now()) @db.Timestamp(6)

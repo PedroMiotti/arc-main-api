@@ -109,7 +109,8 @@ export class UserService {
     const [users, total] = await this.prismaService.$transaction([
       this.prismaService.user.findMany({
         where: {
-          ParentId: ownerId,
+          OR: [{ ParentId: ownerId }, { Id: ownerId }],
+          UserTypeId: { in: [2, 3] },
           DeletedAt: null,
         },
         orderBy: { Id: 'asc' },
@@ -135,7 +136,7 @@ export class UserService {
             },
           },
           UserTypeId: true,
-        }
+        },
       }),
       this.prismaService.user.count({ where: { ParentId: ownerId } }),
     ]);
@@ -177,7 +178,7 @@ export class UserService {
         },
         UserTypeId: true,
       },
-    }); 
+    });
 
     if (!user) {
       return new ErrorResult(Status.NotFound, 'User not found.');
@@ -207,7 +208,7 @@ export class UserService {
       }
     }
 
-    if(updateUserDto.Email) {
+    if (updateUserDto.Email) {
       const existingUser = await this.prismaService.user.findFirst({
         where: {
           Email: updateUserDto.Email,
