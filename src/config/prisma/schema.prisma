@@ -103,7 +103,8 @@ model User {
   UserProject        UserProject[]
   UserType           UserType           @relation(fields: [UserTypeId], references: [Id])
   OwnedRoles         Role[]
-  Client             Client[]
+  ClientAccount      Client[]           @relation("Client_ClientAccount")
+  ClientOwner        Client[]           @relation("Client_ClientOwner")
 }
 
 model UserType {
@@ -237,16 +238,18 @@ model Task {
 }
 
 model Client {
-  Id        Int       @id @default(autoincrement())
-  Name      String    @db.VarChar(200)
-  Email     String    @db.VarChar(200)
-  Phone     String    @db.VarChar(200)
-  UserId    Int
-  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt DateTime? @db.Timestamp(6)
-  User      User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  Project   Project[]
+  Id          Int       @id @default(autoincrement())
+  Name        String    @db.VarChar(200)
+  Email       String    @db.VarChar(200)
+  Phone       String    @db.VarChar(200)
+  UserId      Int
+  OwnerId     Int
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  User        User      @relation("Client_ClientAccount", fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ClientOwner User      @relation("Client_ClientOwner", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project     Project[]
 }
 
 // Schedule ----------------

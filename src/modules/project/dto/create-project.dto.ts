@@ -40,6 +40,13 @@ export class CreateProjectDto {
   LeaderId: number;
 
   @ApiProperty({
+    description: 'Client Id of the project',
+    example: 1,
+  })
+  @IsNumber()
+  ClientId: number;
+
+  @ApiProperty({
     description: 'When the project has started or will start',
     example: '2024-02-01',
   })

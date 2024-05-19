@@ -17,12 +17,13 @@ export class ProjectService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(claim: JwtClaims, createProjectDto: CreateProjectDto) {
-    const { Name, Tag, ActivePhaseId, CategoryId, LeaderId } = createProjectDto;
+    const { Name, Tag, ActivePhaseId, CategoryId, LeaderId, ClientId } =
+      createProjectDto;
 
     if (claim.UserTypeId === 1) {
       return new ErrorResult(
         Status.BadRequest,
-        'An admin user cannot create a project. A project has to belong to a user of type 2.',
+        'An admin user cannot create a project. A project has to belong to a user of type 2 (Owner) or 3 (Member).',
       );
     }
 
@@ -68,6 +69,28 @@ export class ProjectService {
       }
     }
 
+    const existingClient = await this.prismaService.client.findUnique({
+      where: {
+        Id: ClientId,
+      },
+    });
+
+    if (!existingClient) {
+      return new ErrorResult(
+        Status.NotFound,
+        'Could not find any client with provided ID.',
+      );
+    }
+
+    const isClientSameOwner = existingClient.OwnerId === claim.OwnerId;
+
+    if (!isClientSameOwner) {
+      return new ErrorResult(
+        Status.InvalidOperation,
+        'The client and the project does not belong in the same organization.',
+      );
+    }
+
     const project = await this.prismaService.project.create({
       data: {
         Name,
@@ -75,6 +98,7 @@ export class ProjectService {
         ...(ActivePhaseId && { ActivePhaseId }),
         CategoryId,
         LeaderId,
+        ClientId,
         CreatedBy: claim.Id,
         OwnerId: claim.OwnerId,
         StartAt: new Date(createProjectDto.StartAt),

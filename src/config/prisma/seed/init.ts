@@ -12,7 +12,31 @@ const seedAuth = async () => {
 
   await prisma.userType.create({
     data: {
-      Description: 'Common',
+      Description: 'Owner',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.userType.create({
+    data: {
+      Description: 'Member',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.userType.create({
+    data: {
+      Description: 'Client',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.invitationStatus.create({
+    data: {
+      Description: 'Not sent',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -186,6 +210,22 @@ const seedDrive = async () => {
   await prisma.accessLevel.create({
     data: {
       Description: 'Delete',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.accessLevel.create({
+    data: {
+      Description: 'Move',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.accessLevel.create({
+    data: {
+      Description: 'Share',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },

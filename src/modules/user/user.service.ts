@@ -76,7 +76,7 @@ export class UserService {
       Password: hashedPassword,
       Phone,
       RoleId,
-      UserTypeId: UserTypeId ?? 2,
+      UserTypeId: UserTypeId ?? 3,
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     };
@@ -85,6 +85,7 @@ export class UserService {
       dto.InvitationStatusId = 3;
       dto.IsMaster = true;
       dto.ParentId = null;
+      dto.UserTypeId = 2;
     } else {
       dto.ParentId = claims?.OwnerId;
       dto.IsMaster = false;
@@ -203,6 +204,24 @@ export class UserService {
 
       if (!existingRole) {
         return new ErrorResult(Status.BadRequest, 'Role not found.');
+      }
+    }
+
+    if(updateUserDto.Email) {
+      const existingUser = await this.prismaService.user.findFirst({
+        where: {
+          Email: updateUserDto.Email,
+          Id: {
+            not: id,
+          },
+        },
+      });
+
+      if (existingUser) {
+        return new ErrorResult(
+          Status.BadRequest,
+          'A user with this email already exists.',
+        );
       }
     }
 
