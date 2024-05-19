@@ -103,6 +103,7 @@ model User {
   UserProject        UserProject[]
   UserType           UserType           @relation(fields: [UserTypeId], references: [Id])
   OwnedRoles         Role[]
+  Client             Client[]
 }
 
 model UserType {
@@ -173,6 +174,7 @@ model Project {
   OwnerId         Int
   LeaderId        Int
   CreatedBy       Int
+  ClientId        Int
   StartAt         DateTime         @db.Timestamp(6)
   EndAt           DateTime?        @db.Timestamp(6)
   CreatedAt       DateTime?        @default(now()) @db.Timestamp(6)
@@ -189,6 +191,7 @@ model Project {
   ProjectOwner    User             @relation("Project_OwnerIdToUser", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   UserProject     UserProject[]
   Phase           Phase[]
+  Client          Client           @relation(fields: [ClientId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model ProjectCategory {
@@ -201,15 +204,15 @@ model ProjectCategory {
 }
 
 model UserProject {
-  Id        Int       @id @default(autoincrement())
-  UserId    Int
-  ProjectId Int
+  Id         Int       @id @default(autoincrement())
+  UserId     Int
+  ProjectId  Int
   IsFavorite Boolean?
-  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt DateTime? @db.Timestamp(6)
-  Project   Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  User      User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  CreatedAt  DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt  DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt  DateTime? @db.Timestamp(6)
+  Project    Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  User       User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Task {
@@ -231,6 +234,19 @@ model Task {
   TaskCreator   User        @relation("Task_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Phase         Phase       @relation(fields: [PhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   BoardStatus   BoardStatus @relation(fields: [StatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Client {
+  Id        Int       @id @default(autoincrement())
+  Name      String    @db.VarChar(200)
+  Email     String    @db.VarChar(200)
+  Phone     String    @db.VarChar(200)
+  UserId    Int
+  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt DateTime? @db.Timestamp(6)
+  User      User      @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project   Project[]
 }
 
 // Schedule ----------------

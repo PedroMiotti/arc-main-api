@@ -152,15 +152,99 @@ export class UserService {
     );
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: number) {
+    const user = await this.prismaService.user.findUnique({
+      where: { Id: id },
+      select: {
+        Id: true,
+        Name: true,
+        Document: true,
+        DocumentType: true,
+        Email: true,
+        Phone: true,
+        IsActive: true,
+        IsMaster: true,
+        ParentId: true,
+        RoleId: true,
+        InvitationStatusId: true,
+        CreatedAt: true,
+        UpdatedAt: true,
+        Role: {
+          select: {
+            Name: true,
+          },
+        },
+        UserTypeId: true,
+      },
+    }); 
+
+    if (!user) {
+      return new ErrorResult(Status.NotFound, 'User not found.');
+    }
+
+    return new OkResult('User found.', user);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { Id: id },
+    });
+
+    if (!user) {
+      return new ErrorResult(Status.NotFound, 'User not found.');
+    }
+
+    if (updateUserDto.RoleId) {
+      const existingRole = await this.prismaService.role.findUnique({
+        where: {
+          Id: updateUserDto.RoleId,
+        },
+      });
+
+      if (!existingRole) {
+        return new ErrorResult(Status.BadRequest, 'Role not found.');
+      }
+    }
+
+    const {
+      Name,
+      Document,
+      DocumentType,
+      Email,
+      InvitationStatusId,
+      IsActive,
+      Phone,
+      RoleId,
+      UserTypeId,
+    } = updateUserDto;
+
+    const dto: Prisma.UserUncheckedUpdateInput = {
+      Name,
+      Document,
+      DocumentType,
+      Email,
+      InvitationStatusId,
+      IsActive,
+      Phone,
+      RoleId,
+      UserTypeId,
+      UpdatedAt: new Date(),
+    };
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { Id: id },
+      data: { ...dto },
+    });
+
+    return new OkResult('User has been successfully updated.', updatedUser);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const deletedUser = await this.prismaService.user.update({
+      where: { Id: id },
+      data: { DeletedAt: new Date() },
+    });
+
+    return new OkResult('User has been successfully deleted.', deletedUser);
   }
 }
