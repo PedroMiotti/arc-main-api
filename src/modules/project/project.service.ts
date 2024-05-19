@@ -123,128 +123,6 @@ export class ProjectService {
     return new OkResult('Project created successfully.', project);
   }
 
-  async findAllUserProjects(claims: JwtClaims, take: number, skip: number) {
-    const userId = claims?.Id;
-
-    const whereQuery: Prisma.ProjectWhereInput = {
-      DeletedAt: null,
-      UserProject: {
-        some: {
-          UserId: userId,
-        },
-      },
-    };
-
-    const [projects, total] = await this.prismaService.$transaction([
-      this.prismaService.project.findMany({
-        where: whereQuery,
-        orderBy: { Id: 'asc' },
-        skip,
-        take,
-        include: {
-          ProjectCategory: true,
-          ProjectLeader: true,
-          ProjectCreator: true,
-          Client: true,
-          ProjectPhase: true,
-          UserProject: {
-            select: {
-              IsFavorite: true,
-            },
-          },
-        },
-      }),
-      this.prismaService.project.count({
-        where: whereQuery,
-      }),
-    ]);
-
-    const msg =
-      projects.length == 0
-        ? 'Search result returned no objects.'
-        : 'Listing available projects.';
-
-    return new PaginatedResult(
-      msg,
-      projects,
-      total,
-      calculateTotalPages(take, total),
-    );
-  }
-
-  async assignUserToProject(
-    claims: JwtClaims,
-    userId: number,
-    projectId: number,
-  ) {
-    const ownerId = claims?.OwnerId;
-
-    const project = await this.prismaService.project.findUnique({
-      where: {
-        Id: projectId,
-      },
-    });
-
-    if (!project) {
-      return new ErrorResult(Status.NotFound, 'Project not found.');
-    }
-
-    const isSameOwner = project.OwnerId === ownerId;
-
-    if (!isSameOwner) {
-      return new ErrorResult(
-        Status.InvalidOperation,
-        'The project and the user does not belong in the same organization.',
-      );
-    }
-
-    await this.prismaService.userProject.create({
-      data: {
-        UserId: userId,
-        ProjectId: projectId,
-        IsFavorite: false,
-        CreatedAt: new Date(),
-        UpdatedAt: new Date(),
-      },
-    });
-
-    return new OkResult('User assigned to project successfully.', null);
-  }
-
-  async toggleFavoriteProject(
-    claims: JwtClaims,
-    projectId: number,
-    action: 'Favorite' | 'Unfavorite',
-  ) {
-    const userId = claims?.Id;
-
-    const userProject = await this.prismaService.userProject.findFirst({
-      where: {
-        UserId: userId,
-        ProjectId: projectId,
-      },
-    });
-
-    if (!userProject) {
-      return new ErrorResult(
-        Status.NotFound,
-        'The user is not have a relation with the project.',
-      );
-    }
-
-    await this.prismaService.userProject.update({
-      where: {
-        Id: userProject.Id,
-      },
-      data: {
-        IsFavorite: action === 'Favorite' ? true : false,
-        UpdatedAt: new Date(),
-      },
-    });
-
-    return new OkResult('Project favored successfully.', null);
-  }
-
   async findOne(id: number) {
     const project = await this.prismaService.project.findUnique({
       where: {
@@ -382,5 +260,147 @@ export class ProjectService {
     });
 
     return new OkResult('Project deleted successfully.', deletedProject);
+  }
+
+  async findAllUserProjects(claims: JwtClaims, take: number, skip: number) {
+    const userId = claims?.Id;
+
+    const whereQuery: Prisma.ProjectWhereInput = {
+      DeletedAt: null,
+      UserProject: {
+        some: {
+          UserId: userId,
+        },
+      },
+    };
+
+    const [projects, total] = await this.prismaService.$transaction([
+      this.prismaService.project.findMany({
+        where: whereQuery,
+        orderBy: { Id: 'asc' },
+        skip,
+        take,
+        include: {
+          ProjectCategory: true,
+          ProjectLeader: true,
+          ProjectCreator: true,
+          Client: true,
+          ProjectPhase: true,
+          UserProject: {
+            select: {
+              IsFavorite: true,
+            },
+          },
+        },
+      }),
+      this.prismaService.project.count({
+        where: whereQuery,
+      }),
+    ]);
+
+    const msg =
+      projects.length == 0
+        ? 'Search result returned no objects.'
+        : 'Listing available projects.';
+
+    return new PaginatedResult(
+      msg,
+      projects,
+      total,
+      calculateTotalPages(take, total),
+    );
+  }
+
+  async assignUserToProject(
+    claims: JwtClaims,
+    userId: number,
+    projectId: number,
+  ) {
+    const ownerId = claims?.OwnerId;
+
+    const project = await this.prismaService.project.findUnique({
+      where: {
+        Id: projectId,
+      },
+    });
+
+    if (!project) {
+      return new ErrorResult(Status.NotFound, 'Project not found.');
+    }
+
+    const isSameOwner = project.OwnerId === ownerId;
+
+    if (!isSameOwner) {
+      return new ErrorResult(
+        Status.InvalidOperation,
+        'The project and the user does not belong in the same organization.',
+      );
+    }
+
+    await this.prismaService.userProject.create({
+      data: {
+        UserId: userId,
+        ProjectId: projectId,
+        IsFavorite: false,
+        CreatedAt: new Date(),
+        UpdatedAt: new Date(),
+      },
+    });
+
+    return new OkResult('User assigned to project successfully.', null);
+  }
+
+  async toggleFavoriteProject(
+    claims: JwtClaims,
+    projectId: number,
+    action: 'Favorite' | 'Unfavorite',
+  ) {
+    const userId = claims?.Id;
+
+    const userProject = await this.prismaService.userProject.findFirst({
+      where: {
+        UserId: userId,
+        ProjectId: projectId,
+      },
+    });
+
+    if (!userProject) {
+      return new ErrorResult(
+        Status.NotFound,
+        'The user is not have a relation with the project.',
+      );
+    }
+
+    await this.prismaService.userProject.update({
+      where: {
+        Id: userProject.Id,
+      },
+      data: {
+        IsFavorite: action === 'Favorite' ? true : false,
+        UpdatedAt: new Date(),
+      },
+    });
+
+    return new OkResult('Project favored successfully.', null);
+  }
+
+  async findAllCategories() {
+    const categories = await this.prismaService.projectCategory.findMany();
+
+    return new OkResult('Categories found.', categories);
+  }
+
+  async findAllMembers(id: number) {
+    const members = await this.prismaService.user.findMany({
+      where: {
+        UserProject: {
+          some: {
+            ProjectId: id,
+          },
+        },
+      },
+    });
+
+    return new OkResult('Members found.', members);
   }
 }
