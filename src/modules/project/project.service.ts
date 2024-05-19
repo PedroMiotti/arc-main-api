@@ -389,18 +389,4 @@ export class ProjectService {
 
     return new OkResult('Categories found.', categories);
   }
-
-  async findAllMembers(id: number) {
-    const members = await this.prismaService.user.findMany({
-      where: {
-        UserProject: {
-          some: {
-            ProjectId: id,
-          },
-        },
-      },
-    });
-
-    return new OkResult('Members found.', members);
-  }
 }

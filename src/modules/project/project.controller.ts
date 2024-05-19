@@ -177,15 +177,4 @@ export class ProjectController {
       Data: result.data,
     });
   }
-
-  @ApiOperation({ summary: 'List all members' })
-  @Get(':id/members/all')
-  async findAllMembers(@Res() response: Response, @Param('id') id: string) {
-    const result = await this.projectService.findAllMembers(+id);
-
-    handleResponse(response, HttpStatus.OK, {
-      Meta: { Message: result.message },
-      Data: result.data,
-    });
-  }
 }
