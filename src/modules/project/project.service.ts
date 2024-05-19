@@ -141,6 +141,13 @@ export class ProjectService {
         orderBy: { Id: 'asc' },
         skip,
         take,
+        include: {
+          ProjectCategory: true,
+          ProjectLeader: true,
+          ProjectCreator: true,
+          Client: true,
+          ProjectPhase: true,
+        },
       }),
       this.prismaService.project.count({
         where: whereQuery,
