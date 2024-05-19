@@ -85,7 +85,7 @@ export class ProjectController {
   async findOne(@Param('id') id: string, @Res() response: Response) {
     const result = await this.projectService.findOne(+id);
 
-    handleResponse(response, HttpStatus.FOUND, {
+    handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
       Data: result.data,
     });

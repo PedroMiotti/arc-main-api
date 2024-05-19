@@ -77,7 +77,7 @@ export class UserController {
   async findOne(@Param('id') id: string, @Res() response: Response) {
     const result = await this.userService.findOne(+id);
 
-    handleResponse(response, HttpStatus.FOUND, {
+    handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
       Data: result.data,
     });

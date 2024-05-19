@@ -97,7 +97,7 @@ export class ProjectService {
         Tag,
         ...(ActivePhaseId && { ActivePhaseId }),
         CategoryId,
-        LeaderId,
+        LeaderId: claim.Id,
         ClientId,
         CreatedBy: claim.Id,
         OwnerId: claim.OwnerId,
@@ -110,6 +110,16 @@ export class ProjectService {
       } as Prisma.ProjectUncheckedCreateInput,
     });
 
+    await this.prismaService.userProject.create({
+      data: {
+        UserId: claim.Id,
+        ProjectId: project.Id,
+        IsFavorite: false,
+        CreatedAt: new Date(),
+        UpdatedAt: new Date(),
+      },
+    });
+
     return new OkResult('Project created successfully.', project);
   }
 
@@ -118,21 +128,11 @@ export class ProjectService {
 
     const whereQuery: Prisma.ProjectWhereInput = {
       DeletedAt: null,
-      OR: [
-        {
-          LeaderId: userId,
+      UserProject: {
+        some: {
+          UserId: userId,
         },
-        {
-          OwnerId: userId,
-        },
-        {
-          UserProject: {
-            some: {
-              UserId: userId,
-            },
-          },
-        },
-      ],
+      },
     };
 
     const [projects, total] = await this.prismaService.$transaction([
@@ -147,6 +147,11 @@ export class ProjectService {
           ProjectCreator: true,
           Client: true,
           ProjectPhase: true,
+          UserProject: {
+            select: {
+              IsFavorite: true,
+            },
+          },
         },
       }),
       this.prismaService.project.count({
