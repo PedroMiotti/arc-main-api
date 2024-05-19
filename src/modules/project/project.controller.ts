@@ -18,15 +18,12 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiParam,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/guards/jwt.guard';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
 import { Response } from 'express';
 import { handleResponse } from 'src/shared/http/handle-response';
-import { OkResult } from 'src/shared/result/result.interface';
-import { Project } from '@prisma/client';
 import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 import { PaginationResponse } from 'src/shared/pagination/pagination.util';
 

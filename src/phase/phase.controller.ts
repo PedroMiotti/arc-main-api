@@ -11,33 +11,33 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ClientService } from './client.service';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
-import { JwtGuard } from '../auth/guards/jwt.guard';
+import { PhaseService } from './phase.service';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
+import { CreateClientDto } from 'src/modules/client/dto/create-client.dto';
 import { handleResponse } from 'src/shared/http/handle-response';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
+import { Response } from 'express';
+import { CreatePhaseDto } from './dto/create-phase.dto';
 import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 import { PaginationResponse } from 'src/shared/pagination/pagination.util';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
-import { CreateClientDto } from './dto/create-client.dto';
-import { Response } from 'express';
-import { UpdateClientDto } from './dto/update-client.dto';
+import { UpdatePhaseDto } from './dto/update-phase.dto';
 
-@ApiTags('Client')
+@ApiTags('Project Phase')
 @UseGuards(JwtGuard)
 @ApiBearerAuth('Authorization')
-@Controller('client')
-export class ClientController {
-  constructor(private readonly clientService: ClientService) {}
+@Controller('phase')
+export class PhaseController {
+  constructor(private readonly phaseService: PhaseService) {}
 
-  @ApiOperation({ summary: 'Create a new client' })
+  @ApiOperation({ summary: 'Create a new phase' })
   @Post()
   async create(
-    @Body() createClientDto: CreateClientDto,
+    @Body() createPhaseDto: CreatePhaseDto,
     @Res() response: Response,
     @Jwt() claims: JwtClaims,
   ) {
-    const result = await this.clientService.create(claims, createClientDto);
+    const result = await this.phaseService.create(claims, createPhaseDto);
 
     handleResponse(response, HttpStatus.CREATED, {
       Meta: { Message: result.message },
@@ -45,10 +45,10 @@ export class ClientController {
     });
   }
 
-  @ApiOperation({ summary: 'Get all clients by owner' })
-  @Get()
-  async findAllByOwner(
-    @Jwt() claims: JwtClaims,
+  @ApiOperation({ summary: 'Find all by Project ID' })
+  @Get('project/:projectId')
+  async findAllByProject(
+    @Param('projectId') projectId: number,
     @Query('PageNumber') pageNumber: number,
     @Query('PageSize') pageSize: number,
     @Res() response: Response,
@@ -57,7 +57,11 @@ export class ClientController {
       pageNumber,
       pageSize,
     );
-    const result = await this.clientService.findAllByOwner(claims, take, skip);
+    const result = await this.phaseService.findAllByProjectId(
+      Number(projectId),
+      take,
+      skip,
+    );
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
@@ -71,25 +75,10 @@ export class ClientController {
     });
   }
 
-  @ApiOperation({ summary: 'Get a client by ID' })
+  @ApiOperation({ summary: 'Get a phase by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() response: Response) {
-    const result = await this.clientService.findOne(+id);
-
-    handleResponse(response, HttpStatus.FOUND, {
-      Meta: { Message: result.message },
-      Data: result.data,
-    });
-  }
-
-  @ApiOperation({ summary: 'Update a client by ID' })
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateClientDto: UpdateClientDto,
-    @Res() response: Response,
-  ) {
-    const result = await this.clientService.update(+id, updateClientDto);
+    const result = await this.phaseService.findOne(+id);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
@@ -97,10 +86,25 @@ export class ClientController {
     });
   }
 
-  @ApiOperation({ summary: 'Delete a client by ID' })
+  @ApiOperation({ summary: 'Update a phase by ID' })
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updatePhaseDto: UpdatePhaseDto,
+    @Res() response: Response,
+  ) {
+    const result = await this.phaseService.update(+id, updatePhaseDto);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
+  @ApiOperation({ summary: 'Delete a phase by ID' })
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() response: Response) {
-    const result = await this.clientService.remove(+id);
+    const result = await this.phaseService.remove(+id);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },

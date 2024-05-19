@@ -79,7 +79,12 @@ export class ClientService {
         skip,
         take,
       }),
-      this.prismaService.user.count({ where: { ParentId: ownerId } }),
+      this.prismaService.client.count({
+        where: {
+          OwnerId: ownerId,
+          DeletedAt: null,
+        },
+      }),
     ]);
 
     const msg =

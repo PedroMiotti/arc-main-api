@@ -150,20 +150,31 @@ model BoardStatusType {
 }
 
 model Phase {
-  Id              Int       @id @default(autoincrement())
-  Description     String    @db.VarChar(200)
-  Color           String    @db.VarChar(200)
+  Id              Int        @id @default(autoincrement())
+  Description     String     @db.VarChar(200)
+  ColorId         Int
   ProjectId       Int
-  StartAt         String    @db.VarChar(200)
-  EndAt           String    @db.VarChar(200)
+  StartAt         DateTime?
+  EndAt           DateTime?
   CreatedBy       Int
-  CreatedAt       DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt       DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt       DateTime? @db.Timestamp(6)
-  User            User      @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  Project         Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectsInPhase Project[] @relation("Project_ActivePhaseIdToPhase")
+  CreatedAt       DateTime?  @default(now()) @db.Timestamp(6)
+  UpdatedAt       DateTime?  @default(now()) @db.Timestamp(6)
+  DeletedAt       DateTime?  @db.Timestamp(6)
+  User            User       @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project         Project    @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Color           PhaseColor @relation(fields: [ColorId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectsInPhase Project[]  @relation("Project_ActivePhaseIdToPhase")
   Task            Task[]
+}
+
+model PhaseColor {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  Color       String    @db.VarChar(50)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  Phase       Phase[]
 }
 
 model Project {
@@ -241,7 +252,7 @@ model Client {
   Id          Int       @id @default(autoincrement())
   Name        String    @db.VarChar(200)
   Email       String    @db.VarChar(200)
-  Phone       String?    @db.VarChar(200)
+  Phone       String?   @db.VarChar(200)
   UserId      Int
   OwnerId     Int
   CreatedAt   DateTime? @default(now()) @db.Timestamp(6)

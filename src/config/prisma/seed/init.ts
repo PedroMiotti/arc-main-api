@@ -146,6 +146,132 @@ const seedProject = async () => {
       UpdatedAt: new Date(),
     },
   });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Purple',
+      Color: '#9f8fef',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Purple',
+      Color: '#6e5dc6',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Blue',
+      Color: '#579dff',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Blue',
+      Color: '#0c66e4',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Green',
+      Color: '#4bce97',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Green',
+      Color: '#1f845a',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light BlueGreen',
+      Color: '#6cc3e0',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark BlueGreen',
+      Color: '#227d9b',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Yellow',
+      Color: '#f5cd47',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Yellow',
+      Color: '#c25100',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Red',
+      Color: '#f87168',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Red',
+      Color: '#c9372c',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Light Gray',
+      Color: '#8590a2',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.phaseColor.create({
+    data: {
+      Description: 'Dark Gray',
+      Color: '#626f86',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
 };
 
 const seedSchedule = async () => {

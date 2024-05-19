@@ -8,6 +8,7 @@ import { ProjectModule } from './modules/project/project.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ClientModule } from './modules/client/client.module';
+import { PhaseModule } from './phase/phase.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ClientModule } from './modules/client/client.module';
     UserModule,
     ClientModule,
     ProjectModule,
+    PhaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

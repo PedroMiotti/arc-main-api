@@ -74,19 +74,38 @@ export class UserController {
 
   @ApiOperation({ summary: 'Get a user by Id' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.userService.findOne(+id);
+
+    handleResponse(response, HttpStatus.FOUND, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 
   @ApiOperation({ summary: 'Update a user by Id' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Res() response: Response,
+  ) {
+    const result = await this.userService.update(+id, updateUserDto);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 
   @ApiOperation({ summary: 'Delete a user by Id' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.userService.remove(+id);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 }
