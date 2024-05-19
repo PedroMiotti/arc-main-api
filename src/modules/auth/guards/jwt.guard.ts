@@ -9,7 +9,6 @@ import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { JwtClaims } from 'src/shared/http/jwt.decorator';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
@@ -49,7 +48,7 @@ export class JwtGuard implements CanActivate {
       throw new BadRequestException('Invalid Bearer token.');
     }
 
-    if (token) return this.checkIsTokenValid(token)
+    if (token) return this.checkIsTokenValid(rawToken)
       
     throw new UnauthorizedException();
   };
@@ -59,13 +58,15 @@ export class JwtGuard implements CanActivate {
       const isTokenValid = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get('JWT_SECRET_KEY'),
       });
+
       if (!isTokenValid) {
         throw new BadRequestException('Invalid Bearer token.');
       }
 
       return true;
     } catch (error) {
-      throw new BadRequestException('Invalid Bearer token.');
+      console.log(error)
+      throw new BadRequestException('Invalid Bearer token.', JSON.stringify(error));
     }
   };
 }

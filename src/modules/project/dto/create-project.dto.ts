@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -22,7 +22,8 @@ export class CreateProjectDto {
     example: 1,
   })
   @IsNumber()
-  ActivePhaseId: number;
+  @IsOptional()
+  ActivePhaseId?: number;
 
   @ApiProperty({
     description: 'Category id of the project',
@@ -42,13 +43,14 @@ export class CreateProjectDto {
     description: 'When the project has started or will start',
     example: '2024-02-01',
   })
-  @IsNumber()
-  StartAt: number;
+  @IsDateString()
+  StartAt: string;
 
   @ApiProperty({
     description: 'When the project has ended or will end',
     example: '2025-02-01',
   })
-  @IsNumber()
-  EndAt: number;
+  @IsDateString()
+  @IsOptional()
+  EndAt: string;
 }

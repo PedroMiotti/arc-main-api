@@ -4,4 +4,5 @@ export enum Status {
   NotFound = 'Not Found',
   InternalException = 'Server encountered an unexpected condition that prevented it from fulfilling the request.',
   BadRequest = 'Bad request.',
+  Forbidden = 'You are not allowed to perform this operation.',
 }

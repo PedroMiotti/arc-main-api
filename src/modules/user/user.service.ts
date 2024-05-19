@@ -109,10 +109,32 @@ export class UserService {
       this.prismaService.user.findMany({
         where: {
           ParentId: ownerId,
+          DeletedAt: null,
         },
         orderBy: { Id: 'asc' },
         skip,
         take,
+        select: {
+          Id: true,
+          Name: true,
+          Document: true,
+          DocumentType: true,
+          Email: true,
+          Phone: true,
+          IsActive: true,
+          IsMaster: true,
+          ParentId: true,
+          RoleId: true,
+          InvitationStatusId: true,
+          CreatedAt: true,
+          UpdatedAt: true,
+          Role: {
+            select: {
+              Name: true,
+            },
+          },
+          UserTypeId: true,
+        }
       }),
       this.prismaService.user.count({ where: { ParentId: ownerId } }),
     ]);

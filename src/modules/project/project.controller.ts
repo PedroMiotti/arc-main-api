@@ -17,6 +17,7 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -37,11 +38,6 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @ApiOperation({ summary: 'Create a new Project' })
-  @ApiResponse({
-    status: 200,
-    description: 'Result object with new Project data',
-    type: typeof OkResult<Project>,
-  })
   @Post()
   async create(
     @Body() createProjectDto: CreateProjectDto,
@@ -68,8 +64,12 @@ export class ProjectController {
       pageNumber,
       pageSize,
     );
-    
-    const result = await this.projectService.findAllUserProjects(claims, take, skip);
+
+    const result = await this.projectService.findAllUserProjects(
+      claims,
+      take,
+      skip,
+    );
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
@@ -85,19 +85,88 @@ export class ProjectController {
 
   @ApiOperation({ summary: 'Find project by Id' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.projectService.findOne(+id);
+  async findOne(@Param('id') id: string, @Res() response: Response) {
+    const result = await this.projectService.findOne(+id);
+
+    handleResponse(response, HttpStatus.FOUND, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 
-  @ApiOperation({ summary: 'Update project by Id' })
+  @ApiOperation({ summary: 'Assign a user to a project' })
+  @Patch(':id/user/:userId')
+  async assignUserToProject(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+  ) {
+    const result = await this.projectService.assignUserToProject(
+      claims,
+      +userId,
+      +id,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
+  @ApiOperation({ summary: 'Toggle a project as favorite' })
+  @Patch(':id/favorite/:action')
+  @ApiParam({ name: 'action', enum: ['Favorite', 'Unfavorite'] })
+  async toggleFavoriteProject(
+    @Param('id') id: string,
+    @Param('action') action: 'Favorite' | 'Unfavorite',
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+  ) {
+    const result = await this.projectService.toggleFavoriteProject(
+      claims,
+      +id,
+      action,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
+  @ApiOperation({ summary: 'Update project by ID' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProjectDto: UpdateProjectDto) {
-    return this.projectService.update(+id, updateProjectDto);
+  async update(
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+    @Param('id') id: string,
+    @Body() updateProjectDto: UpdateProjectDto,
+  ) {
+    const result = await this.projectService.update(
+      claims,
+      +id,
+      updateProjectDto,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 
-  @ApiOperation({ summary: 'Delete project by Id' })
+  @ApiOperation({ summary: 'Delete a project by ID' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.projectService.remove(+id);
+  async remove(
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+    @Param('id') id: string,
+  ) {
+    const result = await this.projectService.remove(claims, +id);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 }
