@@ -11,6 +11,8 @@ async function bootstrap() {
   const configService = app.get(ConfigService<EnvironmentVariables, true>);
   const port = configService.get<number>('PORT');
 
+  app.enableCors();
+
   const config = new DocumentBuilder()
     .setTitle('Archie Main Api')
     .setDescription('This is the main service for Archie project.')
