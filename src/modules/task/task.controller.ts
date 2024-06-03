@@ -1,42 +1,30 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Query,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
-import { PhaseService } from './phase.service';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from 'src/modules/auth/guards/jwt.guard';
-import { handleResponse } from 'src/shared/http/handle-response';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { TaskService } from './task.service';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { JwtGuard } from '../auth/guards/jwt.guard';
+import { CreateTaskDto } from './dto/create-task.dto';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
 import { Response } from 'express';
-import { CreatePhaseDto } from './dto/create-phase.dto';
+import { handleResponse } from 'src/shared/http/handle-response';
 import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 import { PaginationResponse } from 'src/shared/pagination/pagination.util';
-import { UpdatePhaseDto } from './dto/update-phase.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
-@ApiTags('Project Phase')
+@ApiTags('Project Task')
 @UseGuards(JwtGuard)
 @ApiBearerAuth('Authorization')
-@Controller('phase')
-export class PhaseController {
-  constructor(private readonly phaseService: PhaseService) {}
+@Controller('task')
+export class TaskController {
+  constructor(private readonly taskService: TaskService) {}
 
-  @ApiOperation({ summary: 'Create a new phase' })
+  @ApiOperation({ summary: 'Create a new task' })
   @Post()
   async create(
-    @Body() createPhaseDto: CreatePhaseDto,
+    @Body() createPhaseDto: CreateTaskDto,
     @Res() response: Response,
     @Jwt() claims: JwtClaims,
   ) {
-    const result = await this.phaseService.create(claims, createPhaseDto);
+    const result = await this.taskService.create(claims, createPhaseDto);
 
     handleResponse(response, HttpStatus.CREATED, {
       Meta: { Message: result.message },
@@ -44,10 +32,10 @@ export class PhaseController {
     });
   }
 
-  @ApiOperation({ summary: 'Find all by Project ID' })
-  @Get('project/:projectId')
-  async findAllByProject(
-    @Param('projectId') projectId: number,
+  @ApiOperation({ summary: 'Find all by Phase ID' })
+  @Get('phase/:PhaseId')
+  async findAllByPhase(
+    @Param('PhaseId') phaseId: number,
     @Query('PageNumber') pageNumber: number,
     @Query('PageSize') pageSize: number,
     @Res() response: Response,
@@ -56,8 +44,8 @@ export class PhaseController {
       pageNumber,
       pageSize,
     );
-    const result = await this.phaseService.findAllByProjectId(
-      Number(projectId),
+    const result = await this.taskService.findAllByPhase(
+      Number(phaseId),
       take,
       skip,
     );
@@ -74,10 +62,10 @@ export class PhaseController {
     });
   }
 
-  @ApiOperation({ summary: 'Get a phase by ID' })
+  @ApiOperation({ summary: 'Get a task by ID' })
   @Get(':id')
   async findOne(@Param('id') id: string, @Res() response: Response) {
-    const result = await this.phaseService.findOne(+id);
+    const result = await this.taskService.findOne(+id);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
@@ -85,14 +73,14 @@ export class PhaseController {
     });
   }
 
-  @ApiOperation({ summary: 'Update a phase by ID' })
+  @ApiOperation({ summary: 'Update a task by ID' })
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updatePhaseDto: UpdatePhaseDto,
+    @Body() updateTaskDto: UpdateTaskDto,
     @Res() response: Response,
   ) {
-    const result = await this.phaseService.update(+id, updatePhaseDto);
+    const result = await this.taskService.update(+id, updateTaskDto);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
@@ -100,14 +88,15 @@ export class PhaseController {
     });
   }
 
-  @ApiOperation({ summary: 'Delete a phase by ID' })
+  @ApiOperation({ summary: 'Delete a task by ID' })
   @Delete(':id')
   async remove(@Param('id') id: string, @Res() response: Response) {
-    const result = await this.phaseService.remove(+id);
+    const result = await this.taskService.remove(+id);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
       Data: result.data,
     });
   }
+
 }

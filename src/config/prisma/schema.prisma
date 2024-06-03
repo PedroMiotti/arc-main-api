@@ -236,8 +236,8 @@ model Task {
   StatusId      Int
   AssignTo      Int?
   CreatedBy     Int
-  StartAt       String      @db.VarChar(200)
-  EndAt         String      @db.VarChar(200)
+  StartAt       DateTime?   @db.Timestamp(6)
+  EndAt         DateTime?   @db.Timestamp(6)
   IsOnBoard     Boolean?
   CreatedAt     DateTime?   @default(now()) @db.Timestamp(6)
   UpdatedAt     DateTime?   @default(now()) @db.Timestamp(6)

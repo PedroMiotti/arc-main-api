@@ -9,6 +9,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 import { ClientModule } from './modules/client/client.module';
 import { PhaseModule } from './modules/phase/phase.module';
+import { TaskModule } from './modules/task/task.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { PhaseModule } from './modules/phase/phase.module';
     ClientModule,
     ProjectModule,
     PhaseModule,
+    TaskModule,
   ],
   controllers: [AppController],
   providers: [AppService],
