@@ -18,14 +18,6 @@ export class CreateProjectDto {
   Tag: string;
 
   @ApiProperty({
-    description: 'Active phase id of the project',
-    example: 1,
-  })
-  @IsNumber()
-  @IsOptional()
-  ActivePhaseId?: number;
-
-  @ApiProperty({
     description: 'Category id of the project',
     example: 1,
   })
