@@ -28,11 +28,18 @@ export class CreateTaskDto {
   EstimatedTime?: string;
 
   @ApiProperty({
-    description: 'Phase Id',
+    description: 'The Phase Id that the task belongs to. If not specified, it will go to the backlog.',
     example: 1,
   })
   @IsNumber()
   PhaseId: number;
+
+  @ApiProperty({
+    description: 'The project ID that the task belongs to',
+    example: 1,
+  })
+  @IsNumber()
+  ProjectId: number;
 
   @ApiProperty({
     description: 'Status ID of the task',

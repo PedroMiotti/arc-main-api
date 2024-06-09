@@ -17,8 +17,15 @@ export class TaskService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(claims: JwtClaims, createPhaseDto: CreateTaskDto) {
-    const { Name, StatusId, Description, PhaseId, StartDate, EndDate } =
-      createPhaseDto;
+    const {
+      Name,
+      StatusId,
+      Description,
+      PhaseId,
+      ProjectId,
+      StartDate,
+      EndDate,
+    } = createPhaseDto;
 
     const phase = await this.prismaService.phase.findUnique({
       where: { Id: PhaseId },
@@ -28,20 +35,24 @@ export class TaskService {
             OwnerId: true,
           },
         },
-      }
+      },
     });
 
     if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
 
     const isSameOwner = phase.Project.OwnerId === claims.OwnerId;
     if (!isSameOwner)
-      return new ErrorResult(Status.Forbidden, 'The selected phase does not belong to this Owner ID.');
+      return new ErrorResult(
+        Status.Forbidden,
+        'The selected phase does not belong to this Owner ID.',
+      );
 
     const dto: Prisma.TaskUncheckedCreateInput = {
       Name,
       StatusId,
       Description,
-      PhaseId,
+      ProjectId,
+      ...(PhaseId && { PhaseId }),
       ...(StartDate && { StartAt: new Date(StartDate) }),
       ...(EndDate && { EndAt: new Date(EndDate) }),
       CreatedBy: claims.OwnerId,
@@ -86,6 +97,23 @@ export class TaskService {
     );
   }
 
+  async findAllByProject(projectId: number) {
+    const tasks = await this.prismaService.task.findMany({
+      where: {
+        ProjectId: projectId,
+        DeletedAt: null,
+      },
+      orderBy: { UpdatedAt: 'asc' },
+    });
+
+    const msg =
+      tasks.length == 0
+        ? 'Search result returned no objects.'
+        : 'Search result returned successfully.';
+
+    return new OkResult(msg, tasks);
+  }
+
   async findOne(id: number) {
     const task = await this.prismaService.task.findUnique({
       where: { Id: id },
@@ -109,6 +137,28 @@ export class TaskService {
       ...(EndDate && { EndAt: new Date(EndDate) }),
       UpdatedAt: new Date(),
     };
+
+    if (PhaseId) {
+      const phase = await this.prismaService.phase.findUnique({
+        where: { Id: PhaseId },
+      });
+
+      const activePhases = await this.prismaService.phase.findMany({
+        where: {
+          ProjectId: phase.ProjectId,
+          IsActive: true,
+          DeletedAt: null,
+        },
+      });
+
+      if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
+
+      const isActivePhase = activePhases.find((x) => x.Id === PhaseId)
+        ? true
+        : false;
+
+      dto.IsOnBoard = isActivePhase;
+    }
 
     const task = await this.prismaService.task.update({
       where: { Id: id },

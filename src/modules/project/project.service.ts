@@ -285,7 +285,7 @@ export class ProjectService {
           ProjectLeader: true,
           ProjectCreator: true,
           Client: true,
-          ProjectPhase: true,
+          // ProjectPhase: true,
           UserProject: {
             select: {
               IsFavorite: true,

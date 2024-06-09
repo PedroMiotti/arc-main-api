@@ -44,6 +44,17 @@ export class PhaseController {
     });
   }
 
+  @ApiOperation({ summary: 'Initialize Phase' })
+  @Patch(':Id/initialize')
+  async initialize(@Param('Id') id: string, @Res() response: Response) {
+    const result = await this.phaseService.initialize(Number(id));
+
+    handleResponse(response, HttpStatus.CREATED, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
   @ApiOperation({ summary: 'Find all by Project ID' })
   @Get('project/:projectId')
   async findAllByProject(

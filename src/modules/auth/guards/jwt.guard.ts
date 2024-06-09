@@ -3,7 +3,6 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -34,22 +33,22 @@ export class JwtGuard implements CanActivate {
     const token = request.headers['authorization'] as string;
 
     if (!token) {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         "Request is missing 'Authorization' header.",
       );
     }
 
     const [type, rawToken] = token.split(' ');
     if (type !== 'Bearer') {
-      throw new BadRequestException(
+      throw new UnauthorizedException(
         "'Authorization header is not of type 'Bearer'.",
       );
     } else if (!rawToken) {
-      throw new BadRequestException('Invalid Bearer token.');
+      throw new UnauthorizedException('Invalid Bearer token.');
     }
 
-    if (token) return this.checkIsTokenValid(rawToken)
-      
+    if (token) return this.checkIsTokenValid(rawToken);
+
     throw new UnauthorizedException();
   };
 
@@ -60,13 +59,16 @@ export class JwtGuard implements CanActivate {
       });
 
       if (!isTokenValid) {
-        throw new BadRequestException('Invalid Bearer token.');
+        throw new UnauthorizedException('Invalid Bearer token.');
       }
 
       return true;
     } catch (error) {
-      console.log(error)
-      throw new BadRequestException('Invalid Bearer token.', JSON.stringify(error));
+      console.log(error);
+      throw new UnauthorizedException(
+        'Invalid Bearer token.',
+        JSON.stringify(error),
+      );
     }
   };
 }

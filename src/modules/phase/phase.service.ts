@@ -36,6 +36,43 @@ export class PhaseService {
     return new OkResult('Phase has been successfully created.', client);
   }
 
+  async initialize(id: number) {
+    const phase = await this.prismaService.phase.findUnique({
+      where: { Id: id },
+    });
+
+    if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
+
+    const activePhases = await this.prismaService.phase.findMany({
+      where: { ProjectId: phase.ProjectId, IsActive: true, DeletedAt: null },
+    });
+
+    const isActivePhase = activePhases.find((x) => x.Id === id) ? true : false;
+
+    if (isActivePhase) {
+      return new ErrorResult(
+        Status.BadRequest,
+        'Phase is already active. Cannot be initialized.',
+      );
+    }
+
+    const [updatedPhase] = await this.prismaService.$transaction([
+      this.prismaService.phase.update({
+        where: { Id: id },
+        data: { IsActive: true },
+      }),
+      this.prismaService.task.updateMany({
+        where: { PhaseId: id },
+        data: { IsOnBoard: true },
+      }),
+    ]);
+
+    return new OkResult(
+      'Phase has been successfully initialized.',
+      updatedPhase,
+    );
+  }
+
   async findAllByProjectId(projectId: number, take: number, skip: number) {
     const [phases, total] = await this.prismaService.$transaction([
       this.prismaService.phase.findMany({
@@ -94,7 +131,7 @@ export class PhaseService {
     const dto: Prisma.PhaseUncheckedUpdateInput = {
       ...(Description && { Description }),
       ...(ColorId && { ColorId }),
-      ...(StartDate && {StartAt: new Date(StartDate)}),
+      ...(StartDate && { StartAt: new Date(StartDate) }),
       ...(EndDate && { EndAt: new Date(EndDate) }),
       UpdatedAt: new Date(),
     };
@@ -123,7 +160,7 @@ export class PhaseService {
       }),
       this.prismaService.task.updateMany({
         where: { PhaseId: id },
-        data: { DeletedAt: new Date() },
+        data: { PhaseId: null },
       }),
     ]);
 

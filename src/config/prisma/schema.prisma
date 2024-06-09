@@ -150,21 +150,21 @@ model BoardStatusType {
 }
 
 model Phase {
-  Id              Int        @id @default(autoincrement())
-  Description     String     @db.VarChar(200)
-  ColorId         Int
-  ProjectId       Int
-  StartAt         DateTime?
-  EndAt           DateTime?
-  CreatedBy       Int
-  CreatedAt       DateTime?  @default(now()) @db.Timestamp(6)
-  UpdatedAt       DateTime?  @default(now()) @db.Timestamp(6)
-  DeletedAt       DateTime?  @db.Timestamp(6)
-  User            User       @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  Project         Project    @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  Color           PhaseColor @relation(fields: [ColorId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectsInPhase Project[]  @relation("Project_ActivePhaseIdToPhase")
-  Task            Task[]
+  Id          Int        @id @default(autoincrement())
+  Description String     @db.VarChar(200)
+  ColorId     Int
+  ProjectId   Int
+  IsActive    Boolean    @default(false)
+  StartAt     DateTime?
+  EndAt       DateTime?
+  CreatedBy   Int
+  CreatedAt   DateTime?  @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime?  @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime?  @db.Timestamp(6)
+  User        User       @relation(fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project     Project    @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Color       PhaseColor @relation(fields: [ColorId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Task        Task[]
 }
 
 model PhaseColor {
@@ -181,7 +181,6 @@ model Project {
   Id              Int              @id @default(autoincrement())
   Name            String           @db.VarChar(200)
   Tag             String?          @db.VarChar(200)
-  ActivePhaseId   Int?
   CategoryId      Int?
   OwnerId         Int
   LeaderId        Int
@@ -197,13 +196,13 @@ model Project {
   File            File[]
   Folder          Folder[]
   ProjectCategory ProjectCategory? @relation(fields: [CategoryId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  ProjectPhase    Phase?           @relation("Project_ActivePhaseIdToPhase", fields: [ActivePhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   ProjectCreator  User             @relation("Project_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   ProjectLeader   User             @relation("Project_LeaderIdToUser", fields: [LeaderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   ProjectOwner    User             @relation("Project_OwnerIdToUser", fields: [OwnerId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   UserProject     UserProject[]
   Phase           Phase[]
   Client          Client           @relation(fields: [ClientId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Task            Task[]
 }
 
 model ProjectCategory {
@@ -232,7 +231,8 @@ model Task {
   Name          String      @db.VarChar(200)
   Description   String?     @db.VarChar(200)
   EstimatedTime Int?
-  PhaseId       Int
+  PhaseId       Int?
+  ProjectId     Int
   StatusId      Int
   AssignTo      Int?
   CreatedBy     Int
@@ -244,7 +244,8 @@ model Task {
   DeletedAt     DateTime?   @db.Timestamp(6)
   TaskAssignee  User?       @relation("Task_AssignToToUser", fields: [AssignTo], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   TaskCreator   User        @relation("Task_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  Phase         Phase       @relation(fields: [PhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Phase         Phase?      @relation(fields: [PhaseId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project       Project     @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   BoardStatus   BoardStatus @relation(fields: [StatusId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }
 
