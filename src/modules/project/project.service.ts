@@ -17,8 +17,7 @@ export class ProjectService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(claim: JwtClaims, createProjectDto: CreateProjectDto) {
-    const { Name, Tag, ActivePhaseId, CategoryId, LeaderId, ClientId } =
-      createProjectDto;
+    const { Name, Tag, CategoryId, LeaderId, ClientId } = createProjectDto;
 
     if (claim.UserTypeId === 1) {
       return new ErrorResult(
@@ -54,21 +53,6 @@ export class ProjectService {
       );
     }
 
-    if (ActivePhaseId) {
-      const existingPhase = await this.prismaService.phase.findUnique({
-        where: {
-          Id: ActivePhaseId,
-        },
-      });
-
-      if (!existingPhase) {
-        return new ErrorResult(
-          Status.NotFound,
-          'Could not find any phase with provided ID.',
-        );
-      }
-    }
-
     const existingClient = await this.prismaService.client.findUnique({
       where: {
         Id: ClientId,
@@ -95,7 +79,6 @@ export class ProjectService {
       data: {
         Name,
         Tag,
-        ...(ActivePhaseId && { ActivePhaseId }),
         CategoryId,
         LeaderId: claim.Id,
         ClientId,
@@ -163,7 +146,7 @@ export class ProjectService {
       );
     }
 
-    const { Name, Tag, ActivePhaseId, CategoryId, LeaderId } = updateProjectDto;
+    const { Name, Tag, CategoryId, LeaderId } = updateProjectDto;
 
     if (LeaderId) {
       const existingUser = await this.prismaService.user.findUnique({
@@ -196,21 +179,6 @@ export class ProjectService {
       }
     }
 
-    if (ActivePhaseId) {
-      const existingPhase = await this.prismaService.phase.findUnique({
-        where: {
-          Id: ActivePhaseId,
-        },
-      });
-
-      if (!existingPhase) {
-        return new ErrorResult(
-          Status.NotFound,
-          'Could not find any phase with provided ID.',
-        );
-      }
-    }
-
     const updatedProject = await this.prismaService.project.update({
       where: {
         Id: id,
@@ -218,7 +186,6 @@ export class ProjectService {
       data: {
         Name,
         Tag,
-        ...(ActivePhaseId && { ActivePhaseId }),
         ...(CategoryId && { CategoryId }),
         ...(LeaderId && { LeaderId }),
         UpdatedAt: new Date(),
@@ -381,7 +348,10 @@ export class ProjectService {
       },
     });
 
-    return new OkResult('Project favored successfully.', null);
+    return new OkResult(
+      `Project ${action === 'Favorite' ? 'favored' : 'unfavored'} successfully.`,
+      null,
+    );
   }
 
   async findAllCategories() {

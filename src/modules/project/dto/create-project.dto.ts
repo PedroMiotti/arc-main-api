@@ -30,7 +30,7 @@ export class CreateProjectDto {
   })
   @IsNumber()
   @IsOptional()
-  LeaderId?: number;
+  LeaderId: number;
 
   @ApiProperty({
     description: 'Client Id of the project',
