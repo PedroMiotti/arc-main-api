@@ -11,8 +11,7 @@ ENV NODE_ENV dev
 COPY package.json ./
 COPY package-lock.json ./
 
-
-RUN yarn install --frozen-lockfile
+RUN npm install --frozen-lockfile
 # If you are building your code for production
 # RUN npm ci --only=production
 
@@ -21,6 +20,6 @@ COPY . .
 
 RUN npx prisma generate
 
-RUN yarn build
+RUN npm run build
 
 CMD [ "node", "dist/main" ]
