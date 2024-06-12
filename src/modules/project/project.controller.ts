@@ -55,6 +55,7 @@ export class ProjectController {
     @Jwt() claims: JwtClaims,
     @Query('PageNumber') pageNumber: number,
     @Query('PageSize') pageSize: number,
+    @Query('Query') query: string,
     @Res() response: Response,
   ) {
     const { skip, take, PageNumber, PageSize } = new PaginationFilter(
@@ -66,6 +67,7 @@ export class ProjectController {
       claims,
       take,
       skip,
+      query
     );
 
     handleResponse(response, HttpStatus.OK, {

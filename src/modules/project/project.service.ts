@@ -229,17 +229,59 @@ export class ProjectService {
     return new OkResult('Project deleted successfully.', deletedProject);
   }
 
-  async findAllUserProjects(claims: JwtClaims, take: number, skip: number) {
+  async findAllUserProjects(
+    claims: JwtClaims,
+    take: number,
+    skip: number,
+    query: string,
+  ) {
     const userId = claims?.Id;
 
-    const whereQuery: Prisma.ProjectWhereInput = {
-      DeletedAt: null,
-      UserProject: {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        Id: userId,
+      },
+    });
+
+    const isAdminOwner = user?.UserTypeId === 2;
+
+    const whereQuery: Prisma.ProjectWhereInput = { DeletedAt: null };
+
+    if (isAdminOwner) {
+      whereQuery.OwnerId = claims.OwnerId;
+    } else {
+      whereQuery.UserProject = {
         some: {
           UserId: userId,
         },
-      },
-    };
+      };
+    }
+
+    if (query) {
+      whereQuery.OR = [
+        {
+          Name: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        {
+          Tag: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+      ];
+
+      const isQueryNumber = !isNaN(parseInt(query, 10));
+      if (isQueryNumber) {
+        whereQuery.OR.push({
+          Id: {
+            equals: Number(query),
+          },
+        });
+      }
+    }
 
     const [projects, total] = await this.prismaService.$transaction([
       this.prismaService.project.findMany({
@@ -252,7 +294,22 @@ export class ProjectService {
           ProjectLeader: true,
           ProjectCreator: true,
           Client: true,
-          // ProjectPhase: true,
+          Phase: {
+            select: {
+              Id: true,
+              Description: true,
+              IsActive: true,
+              Color: {
+                select: {
+                  Color: true,
+                },
+              },
+            },
+            where: {
+              DeletedAt: null,
+              IsActive: true,
+            },
+          },
           UserProject: {
             select: {
               IsFavorite: true,
