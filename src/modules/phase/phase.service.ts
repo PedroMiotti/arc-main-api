@@ -24,7 +24,7 @@ export class PhaseService {
       Description,
       ProjectId,
       ColorId,
-      StartAt: new Date(StartDate),
+      ...(StartDate && { StartAt: new Date(StartDate) }),
       ...(EndDate && { EndAt: new Date(EndDate) }),
       CreatedBy: claims.OwnerId,
       CreatedAt: new Date(),

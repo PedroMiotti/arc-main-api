@@ -14,8 +14,7 @@ export class CreatePhaseDto {
     example: 1,
   })
   @IsNumber()
-  @IsOptional()
-  ColorId?: number;
+  ColorId: number;
 
   @ApiProperty({
     description: 'Project Id',
@@ -29,12 +28,14 @@ export class CreatePhaseDto {
     example: '2021-01-01',
   })
   @IsDateString()
-  StartDate: string;
+  @IsOptional()
+  StartDate?: string;
 
   @ApiProperty({
     description: 'End date of the phase',
     example: '2021-02-01',
   })
   @IsDateString()
+  @IsOptional()
   EndDate: string;
 }
