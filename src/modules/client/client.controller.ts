@@ -51,13 +51,19 @@ export class ClientController {
     @Jwt() claims: JwtClaims,
     @Query('PageNumber') pageNumber: number,
     @Query('PageSize') pageSize: number,
+    @Query('Query') query: string,
     @Res() response: Response,
   ) {
     const { skip, take, PageNumber, PageSize } = new PaginationFilter(
       pageNumber,
       pageSize,
     );
-    const result = await this.clientService.findAllByOwner(claims, take, skip);
+    const result = await this.clientService.findAllByOwner(
+      claims,
+      take,
+      skip,
+      query,
+    );
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },

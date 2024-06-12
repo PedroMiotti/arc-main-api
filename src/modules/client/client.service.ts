@@ -66,18 +66,72 @@ export class ClientService {
     return new OkResult('Client has been successfully created.', client);
   }
 
-  async findAllByOwner(claims: JwtClaims, take: number, skip: number) {
+  async findAllByOwner(
+    claims: JwtClaims,
+    take: number,
+    skip: number,
+    query?: string,
+  ) {
     const ownerId = claims?.OwnerId;
+
+    const whereQuery: Prisma.ClientWhereInput = {
+      OwnerId: ownerId,
+      DeletedAt: null,
+    };
+
+    if (query) {
+      whereQuery.OR = [
+        {
+          Name: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+        {
+          Email: {
+            contains: query,
+            mode: 'insensitive',
+          },
+        },
+      ];
+
+      const isQueryNumber = !isNaN(parseInt(query, 10));
+      if (isQueryNumber) {
+        whereQuery.OR.push({
+          Id: {
+            equals: Number(query),
+          },
+        });
+      }
+    }
 
     const [clients, total] = await this.prismaService.$transaction([
       this.prismaService.client.findMany({
-        where: {
-          OwnerId: ownerId,
-          DeletedAt: null,
-        },
+        where: whereQuery,
         orderBy: { Id: 'asc' },
         skip,
         take,
+        include: {
+          Project: {
+            select: {
+              Id: true,
+              Name: true,
+            },
+          },
+          User: {
+            select: {
+              Session: {
+                where: {
+                  DeletedAt: null,
+                },
+                take: 1,
+                orderBy: {
+                  CreatedAt: 'desc',
+                },
+              },
+            },
+          },
+        },
       }),
       this.prismaService.client.count({
         where: {
@@ -87,6 +141,16 @@ export class ClientService {
       }),
     ]);
 
+    const mappedClients = clients.map((client) => {
+      const lastAccess = client.User?.Session[0]?.CreatedAt ?? null;
+
+      const { User, ...rest } = client;
+      return {
+        ...rest,
+        LastSession: lastAccess,
+      };
+    });
+
     const msg =
       clients.length == 0
         ? 'Search result returned no objects.'
@@ -94,7 +158,7 @@ export class ClientService {
 
     return new PaginatedResult(
       msg,
-      clients,
+      mappedClients,
       total,
       calculateTotalPages(take, total),
     );
