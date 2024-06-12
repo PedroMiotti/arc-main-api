@@ -335,6 +335,50 @@ export class ProjectService {
     );
   }
 
+  async findUserFavoriteProjects(claims: JwtClaims) {
+    const userId = claims?.Id;
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        Id: userId,
+      },
+    });
+
+    const isAdminOwner = user?.UserTypeId === 2;
+
+    const whereQuery: Prisma.ProjectWhereInput = { DeletedAt: null };
+
+    if (isAdminOwner) {
+      whereQuery.OwnerId = claims.OwnerId;
+      whereQuery.UserProject = {
+        some: {
+          IsFavorite: true,
+        },
+      };
+    } else {
+      whereQuery.UserProject = {
+        some: {
+          UserId: userId,
+          IsFavorite: true,
+        },
+      };
+    }
+
+    const projects = await this.prismaService.project.findMany({
+      where: whereQuery,
+      orderBy: { UpdatedAt: 'asc' },
+      include: {
+        ProjectCategory: {
+          select: {
+            Description: true,
+          },
+        }
+      }
+    });
+
+    return new OkResult('User favorite projects found.', projects);
+  }
+
   async assignUserToProject(
     claims: JwtClaims,
     userId: number,

@@ -93,6 +93,17 @@ export class ProjectController {
     });
   }
 
+  @ApiOperation({ summary: 'Find user favorite projects' })
+  @Get('/user/favorite')
+  async findUserFavoriteProjects(@Jwt() claims: JwtClaims, @Res() response: Response) {
+    const result = await this.projectService.findUserFavoriteProjects(claims);
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
   @ApiOperation({ summary: 'Assign a user to a project' })
   @Patch(':id/user/:userId')
   async assignUserToProject(
