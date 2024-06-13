@@ -321,8 +321,8 @@ model File {
   MimeType          String?           @db.VarChar(200)
   Extension         String            @db.VarChar(200)
   Size              BigInt?
+  Url               String            @db.VarChar(400)
   IsVisibleToClient Boolean?          @default(false)
-  StorageFileId     Int
   UploadedBy        Int
   FolderId          Int?
   ProjectId         Int?
@@ -331,7 +331,6 @@ model File {
   DeletedAt         DateTime?         @db.Timestamp(6)
   Folder            Folder?           @relation(fields: [FolderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Project           Project?          @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  StorageFile       StorageFile       @relation(fields: [StorageFileId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   User              User              @relation(fields: [UploadedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   FilePermissions   FilePermissions[]
 }
@@ -372,15 +371,6 @@ model FolderPermission {
   AccessLevel   AccessLevel? @relation(fields: [AccessLevelId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Folder        Folder?      @relation(fields: [FolderId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   User          User?        @relation(fields: [UserId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-}
-
-model StorageFile {
-  Id        Int       @id @default(autoincrement())
-  Url       String    @db.VarChar(200)
-  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt DateTime? @db.Timestamp(6)
-  File      File[]
 }
 
 model AccessLevel {

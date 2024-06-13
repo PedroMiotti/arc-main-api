@@ -111,6 +111,9 @@ export class ProjectService {
       where: {
         Id: id,
       },
+      include: {
+        ProjectCategory: true,
+      }
     });
 
     if (!project) {

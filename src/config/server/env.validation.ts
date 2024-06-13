@@ -39,6 +39,12 @@ export class EnvironmentVariables {
   @IsString()
   ENCRYPTION_SALT_ROUNDS: string;
 
+  @IsString()
+  BLOBSTG_URL: string;
+  @IsString()
+  BLOBSTG_CONTAINER: string;
+  @IsString()
+  BLOBSTG_CONNSTR: string;
 
   constructor(
     env: Environment,
@@ -49,6 +55,9 @@ export class EnvironmentVariables {
     jwtRefreshSecretKey: string,
     jwtRefreshExpireTime: string,
     encryptionSaltRounds: string,
+    blobstgUrl: string,
+    blobstgContainer: string,
+    blobstgConnstr: string,
   ) {
     this.ENVIRONMENT = env;
     this.PORT = port;
@@ -58,6 +67,9 @@ export class EnvironmentVariables {
     this.JWT_REFRESH_SECRET_KEY = jwtRefreshSecretKey;
     this.JWT_REFRESH_EXPIRE_TIME = jwtRefreshExpireTime;
     this.ENCRYPTION_SALT_ROUNDS = encryptionSaltRounds;
+    this.BLOBSTG_URL = blobstgUrl;
+    this.BLOBSTG_CONTAINER = blobstgContainer;
+    this.BLOBSTG_CONNSTR = blobstgConnstr;
   }
 }
 
