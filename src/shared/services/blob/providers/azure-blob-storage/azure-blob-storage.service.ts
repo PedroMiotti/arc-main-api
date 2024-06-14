@@ -20,7 +20,7 @@ export class AzureBlobStorageService implements BlobStorage {
   private readonly url: string = this.configService.get<string>('BLOBSTG_URL');
   private readonly container: string =
     this.configService.get<string>('BLOBSTG_CONTAINER');
-  private readonly azblobstg: ContainerClient =
+  private readonly azureBlobStorage: ContainerClient =
     BlobServiceClient.fromConnectionString(
       this.configService.get<string>('BLOBSTG_CONNSTR'),
     ).getContainerClient(this.container);
@@ -30,9 +30,9 @@ export class AzureBlobStorageService implements BlobStorage {
   ) {}
 
   async upload(req: UploadRequest): Promise<Result<UploadResponse>> {
-    const blobname = `${randomBytes(12).toString('base64url')}`;
+    const blobName = `${randomBytes(12).toString('base64url')}`;
 
-    const client = this.azblobstg.getBlockBlobClient(blobname);
+    const client = this.azureBlobStorage.getBlockBlobClient(blobName);
     const resp = await client.uploadData(req.data, {
       blobHTTPHeaders: { blobContentType: req.contentType },
     });
@@ -45,13 +45,13 @@ export class AzureBlobStorageService implements BlobStorage {
     }
 
     return new OkResult('File successfully uploaded to blob storage.', {
-      url: `${this.url}/${this.container}/${blobname}`,
+      url: `${this.url}/${this.container}/${blobName}`,
     });
   }
 
-  async delete(blobname: string): Promise<Result<null>> {
-    blobname = blobname.replace(`${this.url}/${this.container}/`, '');
-    const resp = await this.azblobstg.deleteBlob(blobname);
+  async delete(blobUrl: string): Promise<Result<null>> {
+    blobUrl = blobUrl.replace(`${this.url}/${this.container}/`, '');
+    const resp = await this.azureBlobStorage.deleteBlob(blobUrl);
 
     if (resp._response.status != (HttpStatus.ACCEPTED as number)) {
       return new ErrorResult(
@@ -61,5 +61,13 @@ export class AzureBlobStorageService implements BlobStorage {
     }
 
     return new OkResult('File successfully deleted from blob storage.');
+  }
+
+  async download(blobUrl: string): Promise<Result<NodeJS.ReadableStream>> {
+    blobUrl = blobUrl.replace(`${this.url}/${this.container}/`, '');
+    const resp = await this.azureBlobStorage.getBlobClient(blobUrl);
+    const stream = (await resp.download()).readableStreamBody
+
+    return new OkResult('File successfully downloaded from blob storage.', stream);
   }
 }

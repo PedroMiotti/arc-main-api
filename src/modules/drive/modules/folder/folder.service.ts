@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, StreamableFile } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from 'src/config/prisma/prisma.service';
 import { CreateFolderDto } from '../../dto/create-folder.dto';
@@ -7,10 +7,19 @@ import { JwtClaims } from 'src/shared/http/jwt.decorator';
 import { ErrorResult, OkResult } from 'src/shared/result/result.interface';
 import { Prisma } from '@prisma/client';
 import { Status } from 'src/shared/result/status.enum';
+import { ServerDependency } from 'src/config/server/dependencies';
+import { BlobStorage } from 'src/shared/services/blob/blob-storage.interface';
+import * as archiver from 'archiver';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class FolderService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+
+    @Inject(ServerDependency.BlobStorage)
+    private readonly fileStorageService: BlobStorage,
+  ) {}
 
   async createFolder(claim: JwtClaims, folder: CreateFolderDto) {
     const { Name, ParentId, ProjectId } = folder;
@@ -35,8 +44,13 @@ export class FolderService {
 
   async deleteFolder(id: number) {
     const folder = await this.prismaService.folder.findUnique({
-      where: { Id: id },
-      include: { File: true, ChildFolder: true },
+      where: { Id: id, DeletedAt: null },
+      include: {
+        File: {
+          where: { DeletedAt: null },
+        },
+        ChildFolder: { where: { DeletedAt: null } },
+      },
     });
 
     if (!folder) throw new ErrorResult(Status.NotFound, 'Folder not found.');
@@ -45,6 +59,11 @@ export class FolderService {
       where: { FolderId: id },
       data: { DeletedAt: new Date() },
     });
+    console.log(folder);
+
+    for (const file of folder.File) {
+      await this.fileStorageService.delete(file.Url);
+    }
 
     for (const childFolder of folder.ChildFolder) {
       await this.deleteFolder(childFolder.Id);
@@ -64,6 +83,7 @@ export class FolderService {
     const dto: Prisma.FolderUncheckedUpdateInput = {
       ...(Name && { Name }),
       ...(ParentId && { ParentId }),
+      UpdatedAt: new Date(),
     };
 
     const result = await this.prismaService.folder.update({
@@ -93,12 +113,15 @@ export class FolderService {
         where: {
           ProjectId: projectId,
           ParentId: isRootFolder ? null : folderId,
+          DeletedAt: null,
         },
+        orderBy: { UpdatedAt: 'asc' },
       }),
       this.prismaService.file.findMany({
         where: {
           ProjectId: projectId,
           FolderId: isRootFolder ? null : folderId,
+          DeletedAt: null,
         },
         select: {
           Id: true,
@@ -112,7 +135,14 @@ export class FolderService {
           ProjectId: true,
           CreatedAt: true,
           UpdatedAt: true,
+          User: {
+            select: {
+              Id: true,
+              Name: true,
+            },
+          },
         },
+        orderBy: { UpdatedAt: 'asc' },
       }),
     ]);
 
@@ -133,5 +163,51 @@ export class FolderService {
       files,
       folder,
     });
+  }
+
+  async downloadFolder(folderId: number): Promise<StreamableFile> {
+    const folder = await this.prismaService.folder.findUnique({
+      where: { Id: folderId },
+      include: {
+        File: { where: { DeletedAt: null } },
+        ChildFolder: {
+          include: {
+            File: { where: { DeletedAt: null } },
+            ChildFolder: { where: { DeletedAt: null } },
+          },
+        },
+      },
+    });
+
+    if (!folder) throw new ErrorResult(Status.NotFound, 'Folder not found.');
+
+    const zipStream = new PassThrough();
+    const archive = archiver('zip', {
+      zlib: { level: 9 },
+    });
+
+    archive.pipe(zipStream);
+
+    const addFilesToArchive = async (folder, parentPath = '') => {
+      const folderPath = `${parentPath}${folder.Name}/`;
+
+      for (const file of folder.File) {
+        const downloadResult = await this.fileStorageService.download(file.Url);
+
+        archive.append(downloadResult.data, {
+          name: `${folderPath}${file.Name}${file.Extension}`,
+        });
+      }
+
+      for (const childFolder of folder.ChildFolder) {
+        await addFilesToArchive(childFolder, folderPath);
+      }
+    };
+
+    await addFilesToArchive(folder);
+
+    archive.finalize();
+
+    return new StreamableFile(zipStream);
   }
 }

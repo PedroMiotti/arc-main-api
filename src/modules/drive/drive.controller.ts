@@ -112,6 +112,19 @@ export class DriveController {
     });
   }
 
+  @ApiOperation({ summary: 'Download folder in .zip format' })
+  @Get('folder/:id/download')
+  async download(@Param('id') id: string, @Res() response: Response) {
+    const file = await this.folderService.downloadFolder(Number(id));
+
+    response.set({
+      'Content-Type': 'application/zip',
+      'Content-Disposition': `attachment; filename="pasta-${id}.zip"`,
+    });
+
+    file.getStream().pipe(response);
+  }
+
   @ApiOperation({ summary: 'Upload file' })
   @Post('file')
   @UsePipes(new ValidationPipe({ transform: true }))

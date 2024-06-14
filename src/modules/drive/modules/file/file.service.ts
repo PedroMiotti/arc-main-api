@@ -52,7 +52,7 @@ export class FileService {
       data: dto,
     });
 
-    const { Size , ...rest } = createdFile;
+    const { Size, ...rest } = createdFile;
 
     return new OkResult('File uploaded successfully.', rest);
   }
@@ -79,7 +79,8 @@ export class FileService {
 
     if (!file) return new ErrorResult(Status.NotFound, 'File not found.');
 
-    // TODO - Delete file from storage
+    await this.fileStorageService.delete(file.Url);
+
     await this.prismaService.file.update({
       where: { Id: id },
       data: { DeletedAt: new Date() },
@@ -97,9 +98,10 @@ export class FileService {
 
     await this.prismaService.file.update({
       where: { Id: id },
-      data: { Name: name },
+      data: { Name: name, UpdatedAt: new Date() },
     });
 
     return new OkResult('File renamed successfully.', null);
   }
+  
 }
