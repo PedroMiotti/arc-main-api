@@ -11,6 +11,7 @@ import { ServerDependency } from 'src/config/server/dependencies';
 import { BlobStorage } from 'src/shared/services/blob/blob-storage.interface';
 import * as archiver from 'archiver';
 import { PassThrough } from 'stream';
+import { parse } from 'path';
 
 @Injectable()
 export class FolderService {
@@ -209,5 +210,97 @@ export class FolderService {
     archive.finalize();
 
     return new StreamableFile(zipStream);
+  }
+
+  async getProjectFolderStructure(projectId: number, folderId?: number) {
+    const folders = await this.prismaService.folder.findMany({
+      where: {
+        ProjectId: projectId,
+        DeletedAt: null,
+        ParentId: folderId ? folderId : null,
+      },
+      include: {
+        ChildFolder: folderId
+          ? {
+              include: {
+                ParentFolder: true,
+              },
+            }
+          : true,
+      },
+    });
+
+    return new OkResult(
+      'Project folder structure retrieved successfully.',
+      folders,
+    );
+  }
+
+  async uploadFolder(claims: JwtClaims, files: Express.Multer.File[]) {
+    for (const file of files) {
+      const parsedFilepath = parse(file.originalname);
+      const folderPath = parsedFilepath.dir;
+
+      console.log(folderPath);
+      // const folderId = await this.createFolderStructure(folderPath, claims.Id);
+
+      // const uploadResult = await this.fileStorageService.upload({
+      //   data: file.buffer,
+      //   contentType: file.mimetype,
+      // });
+
+      // const dto: Prisma.FileUncheckedCreateInput = {
+      //   Name: parsedFilepath.name,
+      //   Extension: parsedFilepath.ext,
+      //   MimeType: file.mimetype ?? '',
+      //   Url: uploadResult.data.url,
+      //   Size: file.size,
+      //   FolderId: folderId,
+      //   IsVisibleToClient: true,
+      //   UploadedBy: claims.Id,
+      //   CreatedAt: new Date(),
+      //   UpdatedAt: new Date(),
+      // };
+
+      // await this.prismaService.file.create({ data: dto });
+    }
+
+    return new OkResult('Folder uploaded successfully.', null);
+  }
+
+  private async createFolderStructure(
+    folderPath: string,
+    userId: number,
+    parentId: number = null,
+  ): Promise<number> {
+    const pathSegments = folderPath.split('/');
+    let currentParentId = parentId;
+
+    for (const segment of pathSegments) {
+      if (segment) {
+        let folder = await this.prismaService.folder.findFirst({
+          where: {
+            Name: segment,
+            ParentId: currentParentId,
+          },
+        });
+
+        if (!folder) {
+          folder = await this.prismaService.folder.create({
+            data: {
+              Name: segment,
+              ParentId: currentParentId,
+              CreatedBy: userId,
+              CreatedAt: new Date(),
+              UpdatedAt: new Date(),
+            },
+          });
+        }
+
+        currentParentId = folder.Id;
+      }
+    }
+
+    return currentParentId;
   }
 }

@@ -10,6 +10,7 @@ import {
   Query,
   Res,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
   UsePipes,
@@ -32,7 +33,7 @@ import { UpdateFolderDto } from './dto/update-folder';
 import { UploadFileDto } from './dto/upload-file.dto';
 import { Status } from 'src/shared/result/status.enum';
 import { RenameFileDto } from './dto/rename-file.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Drive')
 @UseGuards(JwtGuard)
@@ -112,6 +113,24 @@ export class DriveController {
     });
   }
 
+  @ApiOperation({ summary: 'Get project folder structure.' })
+  @Get('folder/project/:id/structure')
+  async getProjectFolderStructure(
+    @Param('id') id: string,
+    @Res() response: Response,
+    @Query('FolderId') folderId?: string,
+  ) {
+    const result = await this.folderService.getProjectFolderStructure(
+      Number(id),
+      folderId ? Number(folderId) : null,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
   @ApiOperation({ summary: 'Download folder in .zip format' })
   @Get('folder/:id/download')
   async download(@Param('id') id: string, @Res() response: Response) {
@@ -123,6 +142,22 @@ export class DriveController {
     });
 
     file.getStream().pipe(response);
+  }
+
+  @Post('folder/upload')
+  @UseInterceptors(FilesInterceptor('files'))
+  @ApiConsumes('multipart/form-data')
+  async uploadFolder(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+  ) {
+    const result = await this.folderService.uploadFolder(claims, files);
+
+    handleResponse(response, HttpStatus.CREATED, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
   }
 
   @ApiOperation({ summary: 'Upload file' })
