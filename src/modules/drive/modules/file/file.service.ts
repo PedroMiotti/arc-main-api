@@ -57,7 +57,7 @@ export class FileService {
     return new OkResult('File uploaded successfully.', rest);
   }
 
-  async moveFile(id: number, destinationFolderId: number) {
+  async moveFile(id: number, destinationFolderId: number | null) {
     const file = await this.prismaService.file.findUnique({
       where: { Id: id },
     });

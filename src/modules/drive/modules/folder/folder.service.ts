@@ -84,6 +84,7 @@ export class FolderService {
     const dto: Prisma.FolderUncheckedUpdateInput = {
       ...(Name && { Name }),
       ...(ParentId && { ParentId }),
+      ...(ParentId === null && { ParentId: null }),
       UpdatedAt: new Date(),
     };
 
@@ -220,13 +221,8 @@ export class FolderService {
         ParentId: folderId ? folderId : null,
       },
       include: {
-        ChildFolder: folderId
-          ? {
-              include: {
-                ParentFolder: true,
-              },
-            }
-          : true,
+        ChildFolder: true,
+        ParentFolder: !!folderId,
       },
     });
 
