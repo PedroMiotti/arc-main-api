@@ -11,6 +11,7 @@ import { ClientModule } from './modules/client/client.module';
 import { PhaseModule } from './modules/phase/phase.module';
 import { TaskModule } from './modules/task/task.module';
 import { DriveModule } from './modules/drive/drive.module';
+import { NoteModule } from './modules/note/note.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { DriveModule } from './modules/drive/drive.module';
     ProjectModule,
     PhaseModule,
     TaskModule,
-    DriveModule
+    DriveModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

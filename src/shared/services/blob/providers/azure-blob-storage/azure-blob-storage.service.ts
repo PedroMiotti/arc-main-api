@@ -66,8 +66,32 @@ export class AzureBlobStorageService implements BlobStorage {
   async download(blobUrl: string): Promise<Result<NodeJS.ReadableStream>> {
     blobUrl = blobUrl.replace(`${this.url}/${this.container}/`, '');
     const resp = await this.azureBlobStorage.getBlobClient(blobUrl);
-    const stream = (await resp.download()).readableStreamBody
+    const stream = (await resp.download()).readableStreamBody;
 
-    return new OkResult('File successfully downloaded from blob storage.', stream);
+    return new OkResult(
+      'File successfully downloaded from blob storage.',
+      stream,
+    );
+  }
+
+  async uploadBase64(base64: string): Promise<Result<UploadResponse>> {
+    const matches = base64.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    const type = matches[1];
+    const buffer = Buffer.from(matches[2], 'base64');
+
+    const blobName = `${randomBytes(12).toString('base64url')}`;
+
+    await this.azureBlobStorage.uploadBlockBlob(
+      blobName,
+      buffer,
+      buffer.length,
+      {
+        blobHTTPHeaders: { blobContentType: type },
+      },
+    );
+
+    return new OkResult('File successfully uploaded to blob storage.', {
+      url: `${this.url}/${this.container}/${blobName}`,
+    });
   }
 }

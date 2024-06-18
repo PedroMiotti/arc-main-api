@@ -203,6 +203,7 @@ model Project {
   Phase           Phase[]
   Client          Client           @relation(fields: [ClientId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Task            Task[]
+  Note            Note[]
 }
 
 model ProjectCategory {
@@ -385,14 +386,28 @@ model AccessLevel {
 
 // Note ----------------
 model Note {
-  Id             Int       @id @default(autoincrement())
-  Title          String    @db.VarChar(200)
-  Content        String?
+  Id             Int         @id @default(autoincrement())
+  Title          String      @db.VarChar(200)
+  Content        Json?
   CreatedBy      Int
   UpdatedBy      Int?
-  CreatedAt      DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt      DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt      DateTime? @db.Timestamp(6)
-  NoteCreator    User      @relation("Note_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
-  NoteLastEditor User?     @relation("Note_UpdatedByToUser", fields: [UpdatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  ProjectId      Int
+  CreatedAt      DateTime?   @default(now()) @db.Timestamp(6)
+  UpdatedAt      DateTime?   @default(now()) @db.Timestamp(6)
+  DeletedAt      DateTime?   @db.Timestamp(6)
+  NoteCreator    User        @relation("Note_CreatedByToUser", fields: [CreatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  NoteLastEditor User?       @relation("Note_UpdatedByToUser", fields: [UpdatedBy], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Project        Project     @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  NoteImage      NoteImage[]
+}
+
+model NoteImage {
+  Id        Int       @id @default(autoincrement())
+  NoteId    Int
+  BlockId   String
+  ImageUrl  String    @db.VarChar(200)
+  CreatedAt DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt DateTime? @db.Timestamp(6)
+  Note      Note      @relation(fields: [NoteId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }

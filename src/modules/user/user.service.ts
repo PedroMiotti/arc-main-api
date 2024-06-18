@@ -138,7 +138,13 @@ export class UserService {
           UserTypeId: true,
         },
       }),
-      this.prismaService.user.count({ where: { ParentId: ownerId } }),
+      this.prismaService.user.count({
+        where: {
+          OR: [{ ParentId: ownerId }, { Id: ownerId }],
+          UserTypeId: { in: [2, 3] },
+          DeletedAt: null,
+        },
+      }),
     ]);
 
     const msg =
