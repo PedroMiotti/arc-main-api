@@ -113,7 +113,7 @@ export class ProjectService {
       },
       include: {
         ProjectCategory: true,
-      }
+      },
     });
 
     if (!project) {
@@ -338,6 +338,76 @@ export class ProjectService {
     );
   }
 
+  async findAllClientProjects(claims: JwtClaims, take: number, skip: number) {
+    const userId = claims?.Id;
+
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        Id: userId,
+      },
+      select: {
+        UserTypeId: true,
+        ClientAccount: {
+          select: {
+            Id: true,
+          },
+        },
+      },
+    });
+
+    const isClientUser = user?.UserTypeId === 4;
+
+    if (!isClientUser || !user?.ClientAccount[0]?.Id) {
+      return new ErrorResult(
+        Status.InvalidOperation,
+        'Only client users can view client projects.',
+      );
+    }
+
+    const [projects, total] = await this.prismaService.$transaction([
+      this.prismaService.project.findMany({
+        where: { DeletedAt: null, ClientId: user?.ClientAccount[0]?.Id },
+        orderBy: { UpdatedAt: 'asc' },
+        skip,
+        take,
+        include: {
+          ProjectCategory: true,
+          Phase: {
+            select: {
+              Id: true,
+              Description: true,
+              IsActive: true,
+              Color: {
+                select: {
+                  Color: true,
+                },
+              },
+            },
+            where: {
+              DeletedAt: null,
+              IsActive: true,
+            },
+          },
+        },
+      }),
+      this.prismaService.project.count({
+        where: { DeletedAt: null, ClientId: user?.ClientAccount[0]?.Id },
+      }),
+    ]);
+
+    const msg =
+      projects.length == 0
+        ? 'Search result returned no objects.'
+        : 'Listing available projects.';
+
+    return new PaginatedResult(
+      msg,
+      projects,
+      total,
+      calculateTotalPages(take, total),
+    );
+  }
+
   async findUserFavoriteProjects(claims: JwtClaims) {
     const userId = claims?.Id;
 
@@ -375,8 +445,8 @@ export class ProjectService {
           select: {
             Description: true,
           },
-        }
-      }
+        },
+      },
     });
 
     return new OkResult('User favorite projects found.', projects);

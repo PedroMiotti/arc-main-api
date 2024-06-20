@@ -21,3 +21,17 @@ export class AuthenticateDto {
     this.password = password;
   }
 }
+
+
+export class AuthenticateClientDto {
+  @ApiProperty({
+    description: 'Document of the client',
+    example: '48458026864',
+  })
+  @IsString()
+  document: string;
+
+  constructor(document: string) {
+    this.document = document;
+  }
+}

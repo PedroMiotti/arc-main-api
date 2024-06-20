@@ -26,6 +26,7 @@ import { Response } from 'express';
 import { handleResponse } from 'src/shared/http/handle-response';
 import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 import { PaginationResponse } from 'src/shared/pagination/pagination.util';
+import { PaginatedResult } from 'src/shared/result/result.interface';
 
 @ApiTags('Project')
 @UseGuards(JwtGuard)
@@ -67,7 +68,7 @@ export class ProjectController {
       claims,
       take,
       skip,
-      query
+      query,
     );
 
     handleResponse(response, HttpStatus.OK, {
@@ -79,6 +80,39 @@ export class ProjectController {
         PageSize,
         result.totalObjects,
       ),
+    });
+  }
+
+  @ApiOperation({ summary: 'List all client projects' })
+  @Get('/user/client')
+  async findAllClient(
+    @Jwt() claims: JwtClaims,
+    @Query('PageNumber') pageNumber: number,
+    @Query('PageSize') pageSize: number,
+    @Res() response: Response,
+  ) {
+    const { skip, take, PageNumber, PageSize } = new PaginationFilter(
+      pageNumber,
+      pageSize,
+    );
+
+    const result = await this.projectService.findAllClientProjects(
+      claims,
+      take,
+      skip,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+      ...(result instanceof PaginatedResult && {
+        Pagination: new PaginationResponse(
+          result.totalPages,
+          PageNumber,
+          PageSize,
+          result.totalObjects,
+        ),
+      }),
     });
   }
 
@@ -95,7 +129,10 @@ export class ProjectController {
 
   @ApiOperation({ summary: 'Find user favorite projects' })
   @Get('/user/favorite')
-  async findUserFavoriteProjects(@Jwt() claims: JwtClaims, @Res() response: Response) {
+  async findUserFavoriteProjects(
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+  ) {
     const result = await this.projectService.findUserFavoriteProjects(claims);
 
     handleResponse(response, HttpStatus.OK, {

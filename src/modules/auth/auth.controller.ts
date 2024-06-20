@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthenticateDto } from './dto/authenticate.dto';
+import { AuthenticateClientDto, AuthenticateDto } from './dto/authenticate.dto';
 import { LocalAuthGuard } from './guards/local.guard';
 import { SessionDto } from './dto/session.dto';
 import { User } from '@prisma/client';
@@ -19,7 +19,15 @@ export class AuthController {
     @Body() _AuthenticateDto: AuthenticateDto,
     @Request() req: Request & { user: User },
   ): Promise<SessionDto> {
-    return this.authService.authenticateUser(req.user);
+    return this.authService.createAuthenticatedSession(req.user);
+  }
+
+  @ApiOperation({ summary: 'Authenticate client user by Document' })
+  @Post('login/client')
+  async authenticateClientUser(
+    @Body() dto: AuthenticateClientDto,
+  ): Promise<SessionDto> {
+    return this.authService.authenticateClientUser(dto.document);
   }
 
   @Post('tokens/refresh')

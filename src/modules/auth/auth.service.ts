@@ -18,7 +18,7 @@ export class AuthService {
     private jwtTokenService: JwtService,
   ) {}
 
-  async authenticateUser(user: User) {
+  async createAuthenticatedSession(user: User) {
     const generatedClientId = crypto.randomBytes(16).toString('hex');
 
     const { AccessToken, RefreshToken, ExpiresIn } = this.generateCredentials(
@@ -34,7 +34,6 @@ export class AuthService {
       UpdatedAt: new Date(),
     };
 
-
     await this.prismaService.session.create({
       data: sessionRecord,
     });
@@ -46,6 +45,8 @@ export class AuthService {
     const user = await this.prismaService.user.findFirst({
       where: {
         Email,
+        DeletedAt: null,
+        IsActive: true,
       },
     });
 
@@ -64,6 +65,24 @@ export class AuthService {
       );
 
     return user;
+  }
+
+  async authenticateClientUser(document: string) {
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        Document: document,
+        UserTypeId: 4,
+        DeletedAt: null,
+      },
+    });
+
+    if (!user)
+      throw new HttpException('Incorrect credentials.', HttpStatus.BAD_REQUEST);
+
+    if (!user.IsActive)
+      throw new HttpException('User is no longer active.', HttpStatus.BAD_REQUEST);
+
+    return this.createAuthenticatedSession(user);
   }
 
   generateCredentials(user: User, clientId: string, refreshToken?: string) {
