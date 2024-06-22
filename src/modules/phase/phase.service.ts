@@ -83,6 +83,33 @@ export class PhaseService {
         orderBy: { CreatedAt: 'asc' },
         skip,
         take,
+        include: {
+          Color: true,
+          Task: {
+            where: { DeletedAt: null },
+            select: {
+              Id: true,
+              Name: true,
+              Description: true,
+              PhaseId: true,
+              StartAt: true,
+              EndAt: true,
+              EstimatedTime: true,
+              AssignTo: true,
+              IsOnBoard: true,
+              DeletedAt: true,
+              CreatedAt: true,
+              UpdatedAt: true,
+              TaskAssignee: true,
+              BoardStatus: {
+                select: {
+                  Description: true,
+                  BoardStatusTypeId: true,
+                },
+              },
+            },
+          },
+        },
       }),
       this.prismaService.phase.count({
         where: {

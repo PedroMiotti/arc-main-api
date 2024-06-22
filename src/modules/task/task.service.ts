@@ -27,25 +27,27 @@ export class TaskService {
       EndDate,
     } = createPhaseDto;
 
-    const phase = await this.prismaService.phase.findUnique({
-      where: { Id: PhaseId },
-      select: {
-        Project: {
-          select: {
-            OwnerId: true,
+    if (PhaseId) {
+      const phase = await this.prismaService.phase.findUnique({
+        where: { Id: PhaseId },
+        select: {
+          Project: {
+            select: {
+              OwnerId: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
+      if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
 
-    const isSameOwner = phase.Project.OwnerId === claims.OwnerId;
-    if (!isSameOwner)
-      return new ErrorResult(
-        Status.Forbidden,
-        'The selected phase does not belong to this Owner ID.',
-      );
+      const isSameOwner = phase.Project.OwnerId === claims.OwnerId;
+      if (!isSameOwner)
+        return new ErrorResult(
+          Status.Forbidden,
+          'The selected phase does not belong to this Owner ID.',
+        );
+    }
 
     const dto: Prisma.TaskUncheckedCreateInput = {
       Name,
@@ -97,13 +99,35 @@ export class TaskService {
     );
   }
 
-  async findAllByProject(projectId: number) {
+  async findAllByProject(projectId: number, isBacklog: boolean) {
     const tasks = await this.prismaService.task.findMany({
       where: {
         ProjectId: projectId,
         DeletedAt: null,
+        ...(isBacklog && { PhaseId: null }),
       },
       orderBy: { UpdatedAt: 'asc' },
+      select: {
+        Id: true,
+        Name: true,
+        Description: true,
+        PhaseId: true,
+        StartAt: true,
+        EndAt: true,
+        EstimatedTime: true,
+        AssignTo: true,
+        IsOnBoard: true,
+        DeletedAt: true,
+        CreatedAt: true,
+        UpdatedAt: true,
+        TaskAssignee: true,
+        BoardStatus: {
+          select: {
+            Description: true,
+            BoardStatusTypeId: true,
+          },
+        },
+      },
     });
 
     const msg =

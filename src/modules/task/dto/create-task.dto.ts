@@ -31,8 +31,9 @@ export class CreateTaskDto {
     description: 'The Phase Id that the task belongs to. If not specified, it will go to the backlog.',
     example: 1,
   })
+  @IsOptional()
   @IsNumber()
-  PhaseId: number;
+  PhaseId?: number;
 
   @ApiProperty({
     description: 'The project ID that the task belongs to',

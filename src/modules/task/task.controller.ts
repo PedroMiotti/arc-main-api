@@ -78,9 +78,10 @@ export class TaskController {
   @Get('project/:ProjectId')
   async findAllByProject(
     @Param('ProjectId') projectId: number,
+    @Query('IsBacklog') isBacklog: boolean,
     @Res() response: Response,
   ) {
-    const result = await this.taskService.findAllByProject(Number(projectId));
+    const result = await this.taskService.findAllByProject(Number(projectId), isBacklog);
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
