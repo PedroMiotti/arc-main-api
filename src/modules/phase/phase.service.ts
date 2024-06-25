@@ -17,21 +17,37 @@ export class PhaseService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(claims: JwtClaims, createPhaseDto: CreatePhaseDto) {
-    const { Description, ProjectId, StartDate, EndDate, ColorId } =
-      createPhaseDto;
-
-    const dto: Prisma.PhaseUncheckedCreateInput = {
+    const {
+      Title,
+      DescriptionHtml,
       Description,
       ProjectId,
+      StartAt,
+      EndAt,
       ColorId,
-      ...(StartDate && { StartAt: new Date(StartDate) }),
-      ...(EndDate && { EndAt: new Date(EndDate) }),
+    } = createPhaseDto;
+
+    const dto: Prisma.PhaseUncheckedCreateInput = {
+      Title,
+      ...(Description && { Description }),
+      ...(DescriptionHtml && { DescriptionHtml }),
+      ProjectId,
+      ColorId,
+      ...(StartAt && { StartAt: new Date(StartAt) }),
+      ...(EndAt && { EndAt: new Date(EndAt) }),
       CreatedBy: claims.OwnerId,
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     };
 
-    const client = await this.prismaService.phase.create({ data: dto });
+    const client = await this.prismaService.phase.create({
+      data: dto,
+      include: {
+        Color: true,
+        Task: true,
+        User: true,
+      },
+    });
 
     return new OkResult('Phase has been successfully created.', client);
   }
@@ -85,6 +101,12 @@ export class PhaseService {
         take,
         include: {
           Color: true,
+          User: {
+            select: {
+              Id: true,
+              Name: true,
+            },
+          },
           Task: {
             where: { DeletedAt: null },
             select: {
@@ -153,13 +175,16 @@ export class PhaseService {
       return new ErrorResult(Status.NotFound, 'Phase not found.');
     }
 
-    const { Description, StartDate, EndDate, ColorId } = updatePhaseDto;
+    const { Title, DescriptionHtml, Description, StartAt, EndAt, ColorId } =
+      updatePhaseDto;
 
     const dto: Prisma.PhaseUncheckedUpdateInput = {
+      ...(Title && { Title }),
       ...(Description && { Description }),
+      ...(DescriptionHtml && { DescriptionHtml }),
       ...(ColorId && { ColorId }),
-      ...(StartDate && { StartAt: new Date(StartDate) }),
-      ...(EndDate && { EndAt: new Date(EndDate) }),
+      ...(StartAt && { StartAt: new Date(StartAt) }),
+      ...(EndAt && { EndAt: new Date(EndAt) }),
       UpdatedAt: new Date(),
     };
 

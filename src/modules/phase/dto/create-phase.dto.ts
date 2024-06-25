@@ -3,11 +3,27 @@ import { IsDateString, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePhaseDto {
   @ApiProperty({
+    description: 'Title of the phase',
+    example: 'Pré-Projeto',
+  })
+  @IsString()
+  Title: string;
+
+  @ApiProperty({
     description: 'Description of the phase',
     example: 'Pré-Projeto',
   })
   @IsString()
+  @IsOptional()
   Description: string;
+
+  @ApiProperty({
+    description: 'Description in HTML of the phase',
+    example: '<b>Pré-Projeto</b>',
+  })
+  @IsString()
+  @IsOptional()
+  DescriptionHtml: string;
 
   @ApiProperty({
     description: 'Color Id of the phase',
@@ -29,7 +45,7 @@ export class CreatePhaseDto {
   })
   @IsDateString()
   @IsOptional()
-  StartDate?: string;
+  StartAt?: string;
 
   @ApiProperty({
     description: 'End date of the phase',
@@ -37,5 +53,5 @@ export class CreatePhaseDto {
   })
   @IsDateString()
   @IsOptional()
-  EndDate: string;
+  EndAt: string;
 }

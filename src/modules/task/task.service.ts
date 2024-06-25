@@ -156,7 +156,7 @@ export class TaskService {
       ...(Name && { Name }),
       ...(StatusId && { StatusId }),
       ...(Description && { Description }),
-      ...(PhaseId && { PhaseId }),
+      ...(PhaseId === null ? { PhaseId: null } : { PhaseId }),
       ...(StartDate && { StartAt: new Date(StartDate) }),
       ...(EndDate && { EndAt: new Date(EndDate) }),
       UpdatedAt: new Date(),

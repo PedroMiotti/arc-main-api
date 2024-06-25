@@ -533,4 +533,25 @@ export class ProjectService {
 
     return new OkResult('Categories found.', categories);
   }
+
+  async findProjectMembers(projectId: number) {
+    const project = await this.prismaService.project.findUnique({
+      where: {
+        Id: projectId,
+      },
+    });
+
+    if (!project) return new ErrorResult(Status.NotFound, 'Project not found.');
+
+    const members = await this.prismaService.userProject.findMany({
+      where: {
+        ProjectId: projectId,
+      },
+      include: {
+        User: true,
+      },
+    });
+
+    return new OkResult('Project members found.', members);
+  }
 }
