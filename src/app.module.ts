@@ -12,6 +12,7 @@ import { PhaseModule } from './modules/phase/phase.module';
 import { TaskModule } from './modules/task/task.module';
 import { DriveModule } from './modules/drive/drive.module';
 import { NoteModule } from './modules/note/note.module';
+import { BoardSettingsModule } from './modules/boardSettings/boardSettings.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { NoteModule } from './modules/note/note.module';
     UserModule,
     ClientModule,
     ProjectModule,
+    BoardSettingsModule,
     PhaseModule,
     TaskModule,
     DriveModule,

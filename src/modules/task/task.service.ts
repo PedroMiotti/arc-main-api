@@ -97,7 +97,7 @@ export class TaskService {
       include: {
         TaskAssignee: true,
         BoardStatus: true,
-        TaskCreator: true
+        TaskCreator: true,
       },
     });
 
@@ -196,6 +196,7 @@ export class TaskService {
       PhaseId,
       StartAt,
       EndAt,
+      AssignTo,
     } = updateTaskDto;
 
     const dto: Prisma.TaskUncheckedUpdateInput = {
@@ -208,6 +209,31 @@ export class TaskService {
       ...(EndAt && { EndAt: new Date(EndAt) }),
       UpdatedAt: new Date(),
     };
+
+    if (AssignTo) {
+      const task = await this.prismaService.task.findUnique({
+        where: { Id: id },
+      });
+
+      const user = await this.prismaService.user.findUnique({
+        where: { Id: AssignTo },
+        include: { UserProject: true },
+      });
+
+      if (!user) return new ErrorResult(Status.NotFound, 'User not found.');
+
+      const isProjectMember = user.UserProject.find(
+        (x) => x.ProjectId === task.ProjectId,
+      );
+
+      if (!isProjectMember)
+        return new ErrorResult(
+          Status.Forbidden,
+          'The selected user is not a member of the project.',
+        );
+
+      dto.AssignTo = AssignTo;
+    }
 
     if (PhaseId) {
       const phase = await this.prismaService.phase.findUnique({

@@ -118,19 +118,22 @@ model UserType {
 
 // Project ----------------
 model BoardColumns {
-  Id          Int       @id @default(autoincrement())
+  Id          Int           @id @default(autoincrement())
   ProjectId   Int
-  Description String    @db.VarChar(200)
-  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt   DateTime? @db.Timestamp(6)
-  Project     Project   @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  Description String        @db.VarChar(200)
+  Position    Int
+  CreatedAt   DateTime?     @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime?     @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime?     @db.Timestamp(6)
+  Project     Project       @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  BoardStatus BoardStatus[]
 }
 
 model BoardStatus {
   Id                Int             @id @default(autoincrement())
   ProjectId         Int
   Description       String          @db.VarChar(200)
+  BoardColumnId     Int?
   BoardStatusTypeId Int
   CreatedAt         DateTime?       @default(now()) @db.Timestamp(6)
   UpdatedAt         DateTime?       @default(now()) @db.Timestamp(6)
@@ -138,6 +141,7 @@ model BoardStatus {
   BoardStatusType   BoardStatusType @relation(fields: [BoardStatusTypeId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Project           Project         @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Task              Task[]
+  BoardColumn       BoardColumns?    @relation(fields: [BoardColumnId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model BoardStatusType {

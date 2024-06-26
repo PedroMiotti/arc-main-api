@@ -18,7 +18,6 @@ import { handleResponse } from 'src/shared/http/handle-response';
 import { Jwt, JwtClaims } from 'src/shared/http/jwt.decorator';
 import { PaginationFilter } from 'src/shared/pagination/pagination-filter';
 import { PaginationResponse } from 'src/shared/pagination/pagination.util';
-import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { CreateClientDto } from './dto/create-client.dto';
 import { Response } from 'express';
 import { UpdateClientDto } from './dto/update-client.dto';

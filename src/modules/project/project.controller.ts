@@ -241,4 +241,18 @@ export class ProjectController {
       Data: result.data,
     });
   }
+
+  @ApiOperation({ summary: 'Find project statuses' })
+  @Get(':id/status')
+  async findProjectStatuses(
+    @Param('id') id: string,
+    @Res() response: Response,
+  ) {
+    const result = await this.projectService.findProjectMembers(Number(id));
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
 }
