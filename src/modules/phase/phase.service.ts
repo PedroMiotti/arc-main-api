@@ -114,6 +114,7 @@ export class PhaseService {
               Name: true,
               Description: true,
               PhaseId: true,
+              ProjectId: true,
               StartAt: true,
               EndAt: true,
               EstimatedTime: true,
@@ -123,6 +124,7 @@ export class PhaseService {
               CreatedAt: true,
               UpdatedAt: true,
               TaskAssignee: true,
+              TaskCreator: true,
               BoardStatus: {
                 select: {
                   Description: true,

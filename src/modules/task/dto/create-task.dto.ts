@@ -19,6 +19,15 @@ export class CreateTaskDto {
   Description?: string;
 
   @ApiProperty({
+    description: 'Description in HTML of the task',
+    example:
+      '<p>Assinar documento de contrato com a empresa X e entregar na prefeitura</p>',
+  })
+  @IsString()
+  @IsOptional()
+  DescriptionHtml?: string;
+
+  @ApiProperty({
     description:
       'Estimated time to complete the task (h: hours, d: days, w: weeks, m: months)',
     example: '2h',
@@ -47,7 +56,8 @@ export class CreateTaskDto {
     example: 1,
   })
   @IsNumber()
-  StatusId: number;
+  @IsOptional()
+  StatusId?: number;
 
   @ApiProperty({
     description: 'Assigned user ID',
@@ -55,7 +65,7 @@ export class CreateTaskDto {
   })
   @IsNumber()
   @IsOptional()
-  AssignTo: number;
+  AssignTo?: number;
 
   @ApiProperty({
     description: 'Start date of the task',
@@ -63,7 +73,7 @@ export class CreateTaskDto {
   })
   @IsDateString()
   @IsOptional()
-  StartDate: string;
+  StartAt?: string;
 
   @ApiProperty({
     description: 'End date of the task',
@@ -71,5 +81,5 @@ export class CreateTaskDto {
   })
   @IsDateString()
   @IsOptional()
-  EndDate: string;
+  EndAt?: string;
 }

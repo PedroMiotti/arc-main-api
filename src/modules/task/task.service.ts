@@ -21,10 +21,11 @@ export class TaskService {
       Name,
       StatusId,
       Description,
+      DescriptionHtml,
       PhaseId,
       ProjectId,
-      StartDate,
-      EndDate,
+      StartAt,
+      EndAt,
     } = createPhaseDto;
 
     if (PhaseId) {
@@ -51,18 +52,54 @@ export class TaskService {
 
     const dto: Prisma.TaskUncheckedCreateInput = {
       Name,
-      StatusId,
-      Description,
       ProjectId,
+      StatusId,
+      ...(Description && { Description }),
+      ...(DescriptionHtml && { DescriptionHtml }),
       ...(PhaseId && { PhaseId }),
-      ...(StartDate && { StartAt: new Date(StartDate) }),
-      ...(EndDate && { EndAt: new Date(EndDate) }),
+      ...(StartAt && { StartAt: new Date(StartAt) }),
+      ...(EndAt && { EndAt: new Date(EndAt) }),
       CreatedBy: claims.OwnerId,
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     };
 
-    const task = await this.prismaService.task.create({ data: dto });
+    const projectStatuses = await this.prismaService.boardStatus.findMany({
+      where: {
+        ProjectId: ProjectId,
+      },
+    });
+
+    if (StatusId) {
+      const status = projectStatuses.find((x) => x.Id === StatusId);
+
+      if (!status)
+        return new ErrorResult(
+          Status.NotFound,
+          'Status not found in the project.',
+        );
+    } else {
+      const defaultStatus = projectStatuses.find(
+        (x) => x.BoardStatusTypeId === 1,
+      );
+
+      if (!defaultStatus)
+        return new ErrorResult(
+          Status.NotFound,
+          'Default status not found in the project.',
+        );
+
+      dto.StatusId = defaultStatus.Id;
+    }
+
+    const task = await this.prismaService.task.create({
+      data: dto,
+      include: {
+        TaskAssignee: true,
+        BoardStatus: true,
+        TaskCreator: true
+      },
+    });
 
     return new OkResult('Task has been successfully created.', task);
   }
@@ -112,6 +149,7 @@ export class TaskService {
         Name: true,
         Description: true,
         PhaseId: true,
+        ProjectId: true,
         StartAt: true,
         EndAt: true,
         EstimatedTime: true,
@@ -121,6 +159,7 @@ export class TaskService {
         CreatedAt: true,
         UpdatedAt: true,
         TaskAssignee: true,
+        TaskCreator: true,
         BoardStatus: {
           select: {
             Description: true,
@@ -149,16 +188,24 @@ export class TaskService {
   }
 
   async update(id: number, updateTaskDto: UpdateTaskDto) {
-    const { Name, StatusId, Description, PhaseId, StartDate, EndDate } =
-      updateTaskDto;
+    const {
+      Name,
+      StatusId,
+      Description,
+      DescriptionHtml,
+      PhaseId,
+      StartAt,
+      EndAt,
+    } = updateTaskDto;
 
     const dto: Prisma.TaskUncheckedUpdateInput = {
       ...(Name && { Name }),
       ...(StatusId && { StatusId }),
       ...(Description && { Description }),
+      ...(DescriptionHtml && { DescriptionHtml }),
       ...(PhaseId === null ? { PhaseId: null } : { PhaseId }),
-      ...(StartDate && { StartAt: new Date(StartDate) }),
-      ...(EndDate && { EndAt: new Date(EndDate) }),
+      ...(StartAt && { StartAt: new Date(StartAt) }),
+      ...(EndAt && { EndAt: new Date(EndAt) }),
       UpdatedAt: new Date(),
     };
 
