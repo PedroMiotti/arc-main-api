@@ -49,7 +49,18 @@ export class PhaseController {
   async initialize(@Param('Id') id: string, @Res() response: Response) {
     const result = await this.phaseService.initialize(Number(id));
 
-    handleResponse(response, HttpStatus.CREATED, {
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
+  @ApiOperation({ summary: 'Conclude Phase' })
+  @Patch(':Id/conclude')
+  async conclude(@Param('Id') id: string, @Res() response: Response) {
+    const result = await this.phaseService.conclude(Number(id));
+
+    handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },
       Data: result.data,
     });

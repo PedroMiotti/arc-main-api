@@ -103,6 +103,35 @@ export class ProjectService {
       },
     });
 
+    const defaultStatuses = [
+      { description: 'Pendente', typeId: 1 },
+      { description: 'Em andamento', typeId: 2 },
+      { description: 'Concluído', typeId: 3 },
+    ];
+
+    for (const status of defaultStatuses) {
+      const columnId = await this.prismaService.boardColumns.create({
+        data: {
+          Description: status.description,
+          ProjectId: project.Id,
+          Position: status.typeId,
+          CreatedAt: new Date(),
+          UpdatedAt: new Date(),
+        },
+      });
+
+      await this.prismaService.boardStatus.create({
+        data: {
+          ProjectId: project.Id,
+          Description: status.description,
+          BoardStatusTypeId: status.typeId,
+          BoardColumnId: columnId.Id,
+          CreatedAt: new Date(),
+          UpdatedAt: new Date(),
+        },
+      });
+    }
+
     return new OkResult('Project created successfully.', project);
   }
 

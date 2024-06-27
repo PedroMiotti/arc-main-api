@@ -59,11 +59,7 @@ export class PhaseService {
 
     if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
 
-    const activePhases = await this.prismaService.phase.findMany({
-      where: { ProjectId: phase.ProjectId, IsActive: true, DeletedAt: null },
-    });
-
-    const isActivePhase = activePhases.find((x) => x.Id === id) ? true : false;
+    const isActivePhase = phase.IsActive === true;
 
     if (isActivePhase) {
       return new ErrorResult(
@@ -85,6 +81,39 @@ export class PhaseService {
 
     return new OkResult(
       'Phase has been successfully initialized.',
+      updatedPhase,
+    );
+  }
+
+  async conclude(id: number) {
+    const phase = await this.prismaService.phase.findUnique({
+      where: { Id: id },
+    });
+
+    if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
+
+    const isActivePhase = phase.IsActive === true;
+
+    if (isActivePhase) {
+      return new ErrorResult(
+        Status.BadRequest,
+        'Phase is not active. Cannot be concluded.',
+      );
+    }
+
+    const [updatedPhase] = await this.prismaService.$transaction([
+      this.prismaService.phase.update({
+        where: { Id: id },
+        data: { IsActive: false },
+      }),
+      this.prismaService.task.updateMany({
+        where: { PhaseId: id },
+        data: { IsOnBoard: false },
+      }),
+    ]);
+
+    return new OkResult(
+      'Phase has been successfully conclude.',
       updatedPhase,
     );
   }
@@ -117,6 +146,7 @@ export class PhaseService {
               ProjectId: true,
               StartAt: true,
               EndAt: true,
+              StatusId: true,
               EstimatedTime: true,
               AssignTo: true,
               IsOnBoard: true,

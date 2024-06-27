@@ -155,6 +155,7 @@ export class TaskService {
         EstimatedTime: true,
         AssignTo: true,
         IsOnBoard: true,
+        StatusId: true,
         DeletedAt: true,
         CreatedAt: true,
         UpdatedAt: true,

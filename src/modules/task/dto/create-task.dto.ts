@@ -29,12 +29,12 @@ export class CreateTaskDto {
 
   @ApiProperty({
     description:
-      'Estimated time to complete the task (h: hours, d: days, w: weeks, m: months)',
-    example: '2h',
+      'Estimated hours to complete the task',
+    example: '2',
   })
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  EstimatedTime?: string;
+  EstimatedTime?: number;
 
   @ApiProperty({
     description: 'The Phase Id that the task belongs to. If not specified, it will go to the backlog.',
