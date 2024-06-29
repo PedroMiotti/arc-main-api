@@ -137,6 +137,9 @@ export class BoardSettingsService {
         ProjectId: projectId,
         DeletedAt: null,
       },
+      include: {
+        BoardStatus: true,
+      },
     });
 
     return new OkResult('Board columns found.', columns);

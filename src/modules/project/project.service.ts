@@ -329,6 +329,7 @@ export class ProjectService {
           Phase: {
             select: {
               Id: true,
+              Title: true,
               Description: true,
               IsActive: true,
               Color: {

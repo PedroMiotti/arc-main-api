@@ -81,7 +81,24 @@ export class TaskController {
     @Query('IsBacklog') isBacklog: boolean,
     @Res() response: Response,
   ) {
-    const result = await this.taskService.findAllByProject(Number(projectId), isBacklog);
+    const result = await this.taskService.findAllByProject(
+      Number(projectId),
+      isBacklog,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
+  @ApiOperation({ summary: 'Find all board active by project' })
+  @Get('project/:ProjectId/board')
+  async findAllBoardActive(
+    @Param('ProjectId') projectId: number,
+    @Res() response: Response,
+  ) {
+    const result = await this.taskService.findAllBoardActive(Number(projectId));
 
     handleResponse(response, HttpStatus.OK, {
       Meta: { Message: result.message },

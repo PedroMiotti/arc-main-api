@@ -178,6 +178,34 @@ export class TaskService {
     return new OkResult(msg, tasks);
   }
 
+  async findAllBoardActive(projectId: number) {
+    const tasks = await this.prismaService.task.findMany({
+      where: {
+        ProjectId: projectId,
+        DeletedAt: null,
+        IsOnBoard: true,
+      },
+      orderBy: { UpdatedAt: 'asc' },
+      include: {
+        TaskAssignee: true,
+        TaskCreator: true,
+        BoardStatus: true,
+        Phase: {
+          include: {
+            Color: true,
+          },
+        },
+      },
+    });
+
+    const msg =
+      tasks.length == 0
+        ? 'Search result returned no objects.'
+        : 'Search result returned successfully.';
+
+    return new OkResult(msg, tasks);
+  }
+
   async findOne(id: number) {
     const task = await this.prismaService.task.findUnique({
       where: { Id: id },
