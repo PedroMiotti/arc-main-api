@@ -151,6 +151,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Purple',
       Color: '#9f8fef',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -160,6 +161,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Purple',
       Color: '#6e5dc6',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -169,6 +171,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Blue',
       Color: '#579dff',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -178,6 +181,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Blue',
       Color: '#0c66e4',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -187,6 +191,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Green',
       Color: '#4bce97',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -196,6 +201,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Green',
       Color: '#1f845a',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -205,6 +211,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light BlueGreen',
       Color: '#6cc3e0',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -214,6 +221,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark BlueGreen',
       Color: '#227d9b',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -223,6 +231,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Yellow',
       Color: '#f5cd47',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -232,6 +241,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Yellow',
       Color: '#c25100',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -241,6 +251,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Red',
       Color: '#f87168',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -250,6 +261,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Red',
       Color: '#c9372c',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -259,6 +271,7 @@ const seedProject = async () => {
     data: {
       Description: 'Light Gray',
       Color: '#8590a2',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },
@@ -268,6 +281,7 @@ const seedProject = async () => {
     data: {
       Description: 'Dark Gray',
       Color: '#626f86',
+      BackgroundColor: '#f0f0f0',
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
     },

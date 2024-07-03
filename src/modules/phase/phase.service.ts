@@ -94,7 +94,7 @@ export class PhaseService {
 
     const isActivePhase = phase.IsActive === true;
 
-    if (isActivePhase) {
+    if (!isActivePhase) {
       return new ErrorResult(
         Status.BadRequest,
         'Phase is not active. Cannot be concluded.',
@@ -104,7 +104,7 @@ export class PhaseService {
     const [updatedPhase] = await this.prismaService.$transaction([
       this.prismaService.phase.update({
         where: { Id: id },
-        data: { IsActive: false },
+        data: { IsActive: false, ConcludedAt: new Date() },
       }),
       this.prismaService.task.updateMany({
         where: { PhaseId: id },
@@ -112,10 +112,7 @@ export class PhaseService {
       }),
     ]);
 
-    return new OkResult(
-      'Phase has been successfully conclude.',
-      updatedPhase,
-    );
+    return new OkResult('Phase has been successfully conclude.', updatedPhase);
   }
 
   async findAllByProjectId(projectId: number, take: number, skip: number) {
@@ -215,8 +212,13 @@ export class PhaseService {
       ...(Description && { Description }),
       ...(DescriptionHtml && { DescriptionHtml }),
       ...(ColorId && { ColorId }),
-      ...(StartAt && { StartAt: new Date(StartAt) }),
-      ...(EndAt && { EndAt: new Date(EndAt) }),
+      ...((StartAt || StartAt === null) && {
+        StartAt: StartAt === null ? null : new Date(StartAt),
+      }),
+      ...((EndAt || EndAt === null) && {
+        EndAt: EndAt === null ? null : new Date(EndAt),
+      }),
+
       UpdatedAt: new Date(),
     };
 

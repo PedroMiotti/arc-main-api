@@ -334,6 +334,8 @@ export class ProjectService {
               IsActive: true,
               Color: {
                 select: {
+                  Description: true,
+                  BackgroundColor: true,
                   Color: true,
                 },
               },

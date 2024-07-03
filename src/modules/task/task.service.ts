@@ -236,6 +236,7 @@ export class TaskService {
       ...(PhaseId === null ? { PhaseId: null } : { PhaseId }),
       ...(StartAt && { StartAt: new Date(StartAt) }),
       ...(EndAt && { EndAt: new Date(EndAt) }),
+      ...(AssignTo === null && { AssignTo: null }),
       UpdatedAt: new Date(),
     };
 

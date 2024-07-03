@@ -141,7 +141,7 @@ model BoardStatus {
   BoardStatusType   BoardStatusType @relation(fields: [BoardStatusTypeId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Project           Project         @relation(fields: [ProjectId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Task              Task[]
-  BoardColumn       BoardColumns?    @relation(fields: [BoardColumnId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
+  BoardColumn       BoardColumns?   @relation(fields: [BoardColumnId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model BoardStatusType {
@@ -163,6 +163,7 @@ model Phase {
   IsActive        Boolean    @default(false)
   StartAt         DateTime?
   EndAt           DateTime?
+  ConcludedAt     DateTime?
   CreatedBy       Int
   CreatedAt       DateTime?  @default(now()) @db.Timestamp(6)
   UpdatedAt       DateTime?  @default(now()) @db.Timestamp(6)
@@ -174,13 +175,14 @@ model Phase {
 }
 
 model PhaseColor {
-  Id          Int       @id @default(autoincrement())
-  Description String    @db.VarChar(200)
-  Color       String    @db.VarChar(50)
-  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
-  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
-  DeletedAt   DateTime? @db.Timestamp(6)
-  Phase       Phase[]
+  Id              Int       @id @default(autoincrement())
+  Description     String    @db.VarChar(200)
+  Color           String    @db.VarChar(50)
+  BackgroundColor String    @default("#FFFFFF") @db.VarChar(50)
+  CreatedAt       DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt       DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt       DateTime? @db.Timestamp(6)
+  Phase           Phase[]
 }
 
 model Project {
