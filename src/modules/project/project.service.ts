@@ -26,17 +26,19 @@ export class ProjectService {
       );
     }
 
-    const existingUser = await this.prismaService.user.findUnique({
-      where: {
-        Id: LeaderId,
-      },
-    });
+    if (LeaderId) {
+      const existingUser = await this.prismaService.user.findUnique({
+        where: {
+          Id: LeaderId,
+        },
+      });
 
-    if (!existingUser) {
-      return new ErrorResult(
-        Status.NotFound,
-        'Could not find any user with provided ID.',
-      );
+      if (!existingUser) {
+        return new ErrorResult(
+          Status.NotFound,
+          'Could not find any user with provided ID.',
+        );
+      }
     }
 
     const existingCategory =
@@ -315,10 +317,13 @@ export class ProjectService {
       }
     }
 
+    // Temporary
+    const isHome = take === 4;
+
     const [projects, total] = await this.prismaService.$transaction([
       this.prismaService.project.findMany({
         where: whereQuery,
-        orderBy: { Id: 'asc' },
+        orderBy: !isHome ? { Id: 'asc' } : { UpdatedAt: 'desc' },
         skip,
         take,
         include: {
@@ -330,13 +335,18 @@ export class ProjectService {
             select: {
               Id: true,
               Title: true,
-              Description: true,
               IsActive: true,
               Color: {
                 select: {
                   Description: true,
                   BackgroundColor: true,
                   Color: true,
+                },
+              },
+              Task: {
+                select: {
+                  Id: true,
+                  BoardStatus: true,
                 },
               },
             },

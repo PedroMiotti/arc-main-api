@@ -28,10 +28,12 @@ export class TaskService {
       EndAt,
     } = createPhaseDto;
 
+    let isOnBoard = false;
     if (PhaseId) {
       const phase = await this.prismaService.phase.findUnique({
         where: { Id: PhaseId },
         select: {
+          IsActive: true,
           Project: {
             select: {
               OwnerId: true,
@@ -41,6 +43,8 @@ export class TaskService {
       });
 
       if (!phase) return new ErrorResult(Status.NotFound, 'Phase not found.');
+
+      isOnBoard = phase.IsActive;
 
       const isSameOwner = phase.Project.OwnerId === claims.OwnerId;
       if (!isSameOwner)
@@ -59,6 +63,7 @@ export class TaskService {
       ...(PhaseId && { PhaseId }),
       ...(StartAt && { StartAt: new Date(StartAt) }),
       ...(EndAt && { EndAt: new Date(EndAt) }),
+      ...(isOnBoard && { IsOnBoard: isOnBoard }),
       CreatedBy: claims.OwnerId,
       CreatedAt: new Date(),
       UpdatedAt: new Date(),
