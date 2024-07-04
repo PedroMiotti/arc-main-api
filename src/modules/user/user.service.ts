@@ -103,16 +103,61 @@ export class UserService {
     );
   }
 
-  async findAllByOwner(claims: JwtClaims, take: number, skip: number) {
+  async findAllByOwner(
+    claims: JwtClaims,
+    take: number,
+    skip: number,
+    query?: string,
+  ) {
     const ownerId = claims?.OwnerId;
+
+    const whereQuery: Prisma.UserWhereInput = {
+      AND: [
+        {
+          OR: [{ ParentId: ownerId }, { Id: ownerId }],
+        },
+        {
+          UserTypeId: { in: [2, 3] },
+        },
+        {
+          DeletedAt: null,
+        },
+      ],
+    };
+
+    if (query) {
+      const searchConditions: Prisma.UserWhereInput = {
+        OR: [
+          {
+            Name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            Email: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+
+      const isQueryNumber = !isNaN(parseInt(query, 10));
+      if (isQueryNumber) {
+        searchConditions.OR.push({
+          Id: {
+            equals: Number(query),
+          },
+        });
+      }
+
+      if (Array.isArray(whereQuery.AND)) whereQuery.AND.push(searchConditions);
+    }
 
     const [users, total] = await this.prismaService.$transaction([
       this.prismaService.user.findMany({
-        where: {
-          OR: [{ ParentId: ownerId }, { Id: ownerId }],
-          UserTypeId: { in: [2, 3] },
-          DeletedAt: null,
-        },
+        where: whereQuery,
         orderBy: { Id: 'asc' },
         skip,
         take,
