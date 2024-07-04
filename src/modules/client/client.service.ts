@@ -113,6 +113,9 @@ export class ClientService {
         take,
         include: {
           Project: {
+            where: {
+              DeletedAt: null,
+            },
             select: {
               Id: true,
               Name: true,
