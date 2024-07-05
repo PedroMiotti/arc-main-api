@@ -60,10 +60,9 @@ export class FolderService {
       where: { FolderId: id },
       data: { DeletedAt: new Date() },
     });
-    console.log(folder);
 
     for (const file of folder.File) {
-      await this.fileStorageService.delete(file.Url);
+      await this.fileStorageService.delete(file.Url, 'drive');
     }
 
     for (const childFolder of folder.ChildFolder) {

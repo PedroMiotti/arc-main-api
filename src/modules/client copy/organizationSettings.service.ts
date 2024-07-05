@@ -37,6 +37,7 @@ export class OrganizationSettingsService {
     const uploadResult = await this.fileStorageService.upload({
       data: LogoImage.buffer,
       contentType: LogoImage.mimetype,
+      container: 'organization',
     });
 
     if (!uploadResult.ok || uploadResult.data === null)
@@ -117,13 +118,15 @@ export class OrganizationSettingsService {
       const uploadResult = await this.fileStorageService.upload({
         data: LogoImage.buffer,
         contentType: LogoImage.mimetype,
+        container: 'organization',
       });
 
-      // Todo clean up old logo image
-
+      
       if (!uploadResult.ok || uploadResult.data === null)
         return new ErrorResult(uploadResult.status, uploadResult.message);
-
+      
+      await this.fileStorageService.delete(existingOrganizationSettings.LogoUrl, 'organization')
+      
       dto.LogoUrl = uploadResult.data.url;
     }
 

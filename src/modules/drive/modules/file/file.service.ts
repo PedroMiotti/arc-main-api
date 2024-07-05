@@ -27,6 +27,7 @@ export class FileService {
     const uploadResult = await this.fileStorageService.upload({
       data: File.buffer,
       contentType: File.mimetype,
+      container: 'drive'
     });
 
     if (!uploadResult.ok || uploadResult.data === null)
@@ -79,7 +80,7 @@ export class FileService {
 
     if (!file) return new ErrorResult(Status.NotFound, 'File not found.');
 
-    await this.fileStorageService.delete(file.Url);
+    await this.fileStorageService.delete(file.Url, 'drive');
 
     await this.prismaService.file.update({
       where: { Id: id },
