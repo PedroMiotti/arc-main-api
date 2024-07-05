@@ -144,6 +144,31 @@ export class ProjectService {
       },
       include: {
         ProjectCategory: true,
+        Phase: {
+          select: {
+            Id: true,
+            Title: true,
+            IsActive: true,
+            ConcludedAt: true,
+            Color: {
+              select: {
+                Description: true,
+                BackgroundColor: true,
+                Color: true,
+              },
+            },
+            Task: {
+              select: {
+                Id: true,
+                Name: true,
+                BoardStatus: true,
+              },
+            },
+          },
+          where: {
+            DeletedAt: null,
+          },
+        },
       },
     });
 
@@ -417,17 +442,24 @@ export class ProjectService {
           Phase: {
             select: {
               Id: true,
-              Description: true,
+              Title: true,
               IsActive: true,
               Color: {
                 select: {
+                  Description: true,
+                  BackgroundColor: true,
                   Color: true,
+                },
+              },
+              Task: {
+                select: {
+                  Id: true,
+                  BoardStatus: true,
                 },
               },
             },
             where: {
               DeletedAt: null,
-              IsActive: true,
             },
           },
         },
