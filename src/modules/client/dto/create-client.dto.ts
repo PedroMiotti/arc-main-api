@@ -8,11 +8,18 @@ import {
 
 export class CreateClientDto {
   @ApiProperty({
-    description: 'Name of the user',
+    description: 'Name of the client',
     example: 'Pedro Henrique',
   })
   @IsString()
   Name: string;
+
+  @ApiProperty({
+    description: 'Document of the client',
+    example: '48458026869',
+  })
+  @IsString()
+  Document: string;
 
   @ApiProperty({
     description: 'User Phone number',
@@ -23,8 +30,8 @@ export class CreateClientDto {
   Phone?: string;
 
   @ApiProperty({
-    description: 'Email of the user',
-    example: 'user@mail.com',
+    description: 'Email of the client',
+    example: 'client@mail.com',
   })
   @IsString()
   @IsEmail()

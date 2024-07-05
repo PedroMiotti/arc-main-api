@@ -31,7 +31,20 @@ export class ClientService {
       );
     }
 
-    const { Name, Email, Phone } = createClientDto;
+    const existingClient = await this.prismaService.client.findFirst({
+      where: {
+        Document: createClientDto.Document,
+      },
+    });
+
+    if (existingClient) {
+      return new ErrorResult(
+        Status.BadRequest,
+        'A client with the provided document already exists.',
+      );
+    }
+
+    const { Name, Email, Phone, Document } = createClientDto;
 
     const defaultPassword = 'Archie$123';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
@@ -44,6 +57,8 @@ export class ClientService {
         Phone,
         Password: hashedPassword,
         UserTypeId: CLIENT_TYPE_ID,
+        Document,
+        DocumentType: "CPF",
         IsActive: true,
         ParentId: claims.OwnerId,
         CreatedAt: new Date(),
@@ -55,6 +70,8 @@ export class ClientService {
       Name,
       Email,
       Phone,
+      Document,
+      DocumentType: "CPF",
       UserId: user.Id,
       OwnerId: claims.OwnerId,
       CreatedAt: new Date(),
@@ -206,12 +223,31 @@ export class ClientService {
       }
     }
 
-    const { Name, Email, Phone } = updateClientDto;
+    if (updateClientDto.Document) {
+      const existingClient = await this.prismaService.client.findFirst({
+        where: {
+          Document: updateClientDto.Document,
+          Id: {
+            not: client.Id,
+          },
+        },
+      });
+
+      if (existingClient) {
+        return new ErrorResult(
+          Status.BadRequest,
+          'A client with the provided document already exists.',
+        );
+      }
+    }
+
+    const { Name, Email, Phone, Document } = updateClientDto;
 
     const dto: Prisma.ClientUncheckedUpdateInput = {
       Name,
       Email,
       Phone,
+      Document,
       UpdatedAt: new Date(),
     };
 
