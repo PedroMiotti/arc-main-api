@@ -66,15 +66,17 @@ export class UserService {
       hashedPassword = await bcrypt.hash(defaultPassword, 10);
     }
 
+    const sanitizedEmail = Email.toLowerCase();
+
     const dto: Prisma.UserUncheckedCreateInput = {
       Name,
-      Document,
+      ...(Document && { Document: Document.replace(/[^0-9]/g, '') }),
       DocumentType,
-      Email,
+      Email: sanitizedEmail,
       InvitationStatusId: InvitationStatusId ?? 1,
       IsActive: IsActive ?? true,
       Password: hashedPassword,
-      Phone,
+      ...(Phone && { Phone: Phone.replace(/[^0-9]/g, '') }),
       RoleId,
       UserTypeId: UserTypeId ?? 3,
       CreatedAt: new Date(),
@@ -291,12 +293,12 @@ export class UserService {
 
     const dto: Prisma.UserUncheckedUpdateInput = {
       Name,
-      Document,
+      ...(Document && { Document: Document.replace(/[^0-9]/g, '') }),
       DocumentType,
-      Email,
+      ...(Email && { Email: Email.toLowerCase() }),
       InvitationStatusId,
       IsActive,
-      Phone,
+      ...(Phone && { Phone: Phone.replace(/[^0-9]/g, '') }),
       RoleId,
       UserTypeId,
       UpdatedAt: new Date(),

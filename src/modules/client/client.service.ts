@@ -49,16 +49,20 @@ export class ClientService {
     const defaultPassword = 'Archie$123';
     const hashedPassword = await bcrypt.hash(defaultPassword, 10);
 
+    const sanitizedEmail = Email.toLowerCase();
+    const sanitizedDocument = Document.replace(/[^0-9]/g, '');
+    const sanitizedPhone = Phone.replace(/[^0-9]/g, '');
+
     const CLIENT_TYPE_ID = 4;
     const user = await this.prismaService.user.create({
       data: {
         Name,
-        Email,
-        Phone,
+        Email: sanitizedEmail,
+        Phone: sanitizedPhone,
         Password: hashedPassword,
         UserTypeId: CLIENT_TYPE_ID,
-        Document,
-        DocumentType: "CPF",
+        Document: sanitizedDocument,
+        DocumentType: 'CPF',
         IsActive: true,
         ParentId: claims.OwnerId,
         CreatedAt: new Date(),
@@ -68,10 +72,10 @@ export class ClientService {
 
     const dto: Prisma.ClientUncheckedCreateInput = {
       Name,
-      Email,
-      Phone,
-      Document,
-      DocumentType: "CPF",
+      Email: sanitizedEmail,
+      Phone: sanitizedPhone,
+      Document: sanitizedDocument,
+      DocumentType: 'CPF',
       UserId: user.Id,
       OwnerId: claims.OwnerId,
       CreatedAt: new Date(),
@@ -245,11 +249,16 @@ export class ClientService {
 
     const dto: Prisma.ClientUncheckedUpdateInput = {
       Name,
-      Email,
-      Phone,
-      Document,
+      ...(Email && { Email: Email.toLowerCase() }),
+      ...(Document && { Document: Document.replace(/[^0-9]/g, '') }),
+      ...(Phone && { Phone: Phone.replace(/[^0-9]/g, '') }),
       UpdatedAt: new Date(),
     };
+
+    await this.prismaService.user.update({
+      where: { Id: client.UserId },
+      data: { ...dto },
+    });
 
     const updatedClient = await this.prismaService.client.update({
       where: { Id: id },

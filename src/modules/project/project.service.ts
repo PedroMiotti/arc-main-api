@@ -205,7 +205,7 @@ export class ProjectService {
       );
     }
 
-    const { Name, Tag, CategoryId, LeaderId } = updateProjectDto;
+    const { Name, Tag, CategoryId, LeaderId, EndAt, StartAt } = updateProjectDto;
 
     if (LeaderId) {
       const existingUser = await this.prismaService.user.findUnique({
@@ -247,6 +247,8 @@ export class ProjectService {
         Tag,
         ...(CategoryId && { CategoryId }),
         ...(LeaderId && { LeaderId }),
+        ...(StartAt && { StartAt: new Date(StartAt) }),
+        ...(EndAt && { EndAt: new Date(EndAt) }),
         UpdatedAt: new Date(),
       },
     });
