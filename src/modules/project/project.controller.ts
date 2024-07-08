@@ -161,6 +161,26 @@ export class ProjectController {
     });
   }
 
+  @ApiOperation({ summary: 'Remove a user from a project' })
+  @Delete(':id/user/:userId')
+  async removeUserFromProject(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Jwt() claims: JwtClaims,
+    @Res() response: Response,
+  ) {
+    const result = await this.projectService.removeUserFromProject(
+      claims,
+      +userId,
+      +id,
+    );
+
+    handleResponse(response, HttpStatus.OK, {
+      Meta: { Message: result.message },
+      Data: result.data,
+    });
+  }
+
   @ApiOperation({ summary: 'Toggle a project as favorite' })
   @Patch(':id/favorite/:action')
   @ApiParam({ name: 'action', enum: ['Favorite', 'Unfavorite'] })
@@ -230,10 +250,7 @@ export class ProjectController {
 
   @ApiOperation({ summary: 'Find project members' })
   @Get(':id/members')
-  async findProjectMembers(
-    @Param('id') id: string,
-    @Res() response: Response,
-  ) {
+  async findProjectMembers(@Param('id') id: string, @Res() response: Response) {
     const result = await this.projectService.findProjectMembers(Number(id));
 
     handleResponse(response, HttpStatus.OK, {
