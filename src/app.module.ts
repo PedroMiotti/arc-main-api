@@ -13,7 +13,7 @@ import { TaskModule } from './modules/task/task.module';
 import { DriveModule } from './modules/drive/drive.module';
 import { NoteModule } from './modules/note/note.module';
 import { BoardSettingsModule } from './modules/boardSettings/boardSettings.module';
-import { OrganizationSettingsModule } from './modules/client copy/organizationSettings.module';
+import { OrganizationSettingsModule } from './modules/organizationSettings/organizationSettings.module';
 
 @Module({
   imports: [
