@@ -567,6 +567,52 @@ export class ProjectService {
     return new OkResult('User assigned to project successfully.', null);
   }
 
+  async removeUserFromProject(
+    claims: JwtClaims,
+    userId: number,
+    projectId: number,
+  ) {
+    const ownerId = claims?.OwnerId;
+
+    const project = await this.prismaService.project.findUnique({
+      where: {
+        Id: projectId,
+      },
+    });
+
+    if (!project) {
+      return new ErrorResult(Status.NotFound, 'Project not found.');
+    }
+
+    const isSameOwner = project.OwnerId === ownerId;
+
+    if (!isSameOwner) {
+      return new ErrorResult(
+        Status.InvalidOperation,
+        'The project and the user does not belong in the same organization.',
+      );
+    }
+
+    const userProject = await this.prismaService.userProject.findFirst({
+      where: { UserId: userId, ProjectId: projectId },
+    });
+
+    if (!userProject) {
+      return new ErrorResult(
+        Status.NotFound,
+        'This user does not belong to this project.',
+      );
+    }
+
+    await this.prismaService.userProject.delete({
+      where: {
+        Id: userProject.Id,
+      },
+    });
+
+    return new OkResult('User removed from project successfully.', null);
+  }
+
   async toggleFavoriteProject(
     claims: JwtClaims,
     projectId: number,
