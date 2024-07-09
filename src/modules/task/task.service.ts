@@ -245,6 +245,8 @@ export class TaskService {
       UpdatedAt: new Date(),
     };
 
+    if(PhaseId === null) dto.IsOnBoard = false;
+
     if (AssignTo) {
       const task = await this.prismaService.task.findUnique({
         where: { Id: id },

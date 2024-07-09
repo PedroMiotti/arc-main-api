@@ -83,6 +83,30 @@ const seedAuth = async () => {
 };
 
 const seedProject = async () => {
+  await prisma.projectStatus.create({
+    data: {
+      Description: 'Em dia',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.projectStatus.create({
+    data: {
+      Description: 'Em risco',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
+  await prisma.projectStatus.create({
+    data: {
+      Description: 'Em atraso',
+      CreatedAt: new Date(),
+      UpdatedAt: new Date(),
+    },
+  });
+
   await prisma.projectCategory.create({
     data: {
       Description: 'Residencial',

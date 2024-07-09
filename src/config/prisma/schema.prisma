@@ -200,7 +200,10 @@ model PhaseColor {
 model Project {
   Id              Int              @id @default(autoincrement())
   Name            String           @db.VarChar(200)
+  Description     String?          @db.VarChar(200)
+  DescriptionHtml String?          @db.VarChar(200)
   Tag             String?          @db.VarChar(200)
+  StatusId        Int?
   CategoryId      Int?
   OwnerId         Int
   LeaderId        Int
@@ -224,6 +227,16 @@ model Project {
   Client          Client           @relation(fields: [ClientId], references: [Id], onDelete: NoAction, onUpdate: NoAction)
   Task            Task[]
   Note            Note[]
+  ProjectStatus   ProjectStatus?   @relation(fields: [StatusId], references: [Id])
+}
+
+model ProjectStatus {
+  Id          Int       @id @default(autoincrement())
+  Description String    @db.VarChar(200)
+  CreatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  UpdatedAt   DateTime? @default(now()) @db.Timestamp(6)
+  DeletedAt   DateTime? @db.Timestamp(6)
+  Project     Project[]
 }
 
 model ProjectCategory {

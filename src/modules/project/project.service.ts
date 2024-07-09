@@ -144,6 +144,7 @@ export class ProjectService {
       },
       include: {
         ProjectCategory: true,
+        ProjectStatus: true,
         Phase: {
           select: {
             Id: true,
@@ -163,6 +164,9 @@ export class ProjectService {
                 Name: true,
                 BoardStatus: true,
               },
+              where: {
+                DeletedAt: null
+              }
             },
           },
           where: {
@@ -205,7 +209,17 @@ export class ProjectService {
       );
     }
 
-    const { Name, Tag, CategoryId, LeaderId, EndAt, StartAt } = updateProjectDto;
+    const {
+      Name,
+      Tag,
+      CategoryId,
+      LeaderId,
+      EndAt,
+      StartAt,
+      Description,
+      DescriptionHtml,
+      StatusId,
+    } = updateProjectDto;
 
     if (LeaderId) {
       const existingUser = await this.prismaService.user.findUnique({
@@ -249,6 +263,9 @@ export class ProjectService {
         ...(LeaderId && { LeaderId }),
         ...(StartAt && { StartAt: new Date(StartAt) }),
         ...(EndAt && { EndAt: new Date(EndAt) }),
+        ...(Description && { Description }),
+        ...(DescriptionHtml && { DescriptionHtml }),
+        ...(StatusId && { StatusId }),
         UpdatedAt: new Date(),
       },
     });

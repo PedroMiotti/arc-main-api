@@ -53,4 +53,30 @@ export class CreateProjectDto {
   @IsDateString()
   @IsOptional()
   EndAt: string;
+
+  @ApiProperty({
+    description: 'Description of the task',
+    example:
+      'Assinar documento de contrato com a empresa X e entregar na prefeitura',
+  })
+  @IsString()
+  @IsOptional()
+  Description?: string;
+
+  @ApiProperty({
+    description: 'Description in HTML of the task',
+    example:
+      '<p>Assinar documento de contrato com a empresa X e entregar na prefeitura</p>',
+  })
+  @IsString()
+  @IsOptional()
+  DescriptionHtml?: string;
+
+  @ApiProperty({
+    description: 'Status Id of the project',
+    example: 1,
+  })
+  @IsNumber()
+  @IsOptional()
+  StatusId: number;
 }
